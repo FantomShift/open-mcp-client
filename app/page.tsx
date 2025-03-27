@@ -468,6 +468,7 @@ export default function Home() {
           labels={{
             title: "MCP Assistant",
             initial: "Need any help with your integrations?",
+            error: "The agent server is currently unavailable. Please run the start_agent.bat script in the agent folder to start the server.",
           }}
         />
       </div>

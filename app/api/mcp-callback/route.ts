@@ -4,6 +4,9 @@ import { cookies } from 'next/headers';
 
 // Helper function to normalize service ID
 function normalizeServiceId(serviceId: string): string {
+  // Handle null or undefined
+  if (!serviceId) return '';
+  
   // Convert to lowercase
   let normalized = serviceId.toLowerCase();
   
@@ -18,6 +21,11 @@ function normalizeServiceId(serviceId: string): string {
   // Special case for "googledocs" -> "googlesheets" (if needed)
   if (normalized === 'googledocs') {
     return 'googlesheets';
+  }
+  
+  // Special case for "google drive" -> "googledrive"
+  if (normalized === 'googledrive') {
+    return 'googledrive';
   }
   
   return normalized;

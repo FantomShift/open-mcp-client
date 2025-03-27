@@ -11,12 +11,12 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-border bg-background text-foreground",
-        success: "border-emerald-500/50 bg-background text-foreground",
-        error: "border-red-500/50 bg-background text-foreground",
-        warning: "border-amber-500/50 bg-background text-foreground",
-        info: "border-blue-500/50 bg-background text-foreground",
-        destructive: "border-red-500/50 bg-background text-foreground",
+        default: "border-gray-200 bg-white text-foreground",
+        success: "border-emerald-500/50 bg-emerald-50 text-foreground",
+        error: "border-red-500/50 bg-red-50 text-foreground",
+        warning: "border-amber-500/50 bg-amber-50 text-foreground",
+        info: "border-blue-500/50 bg-blue-50 text-foreground",
+        destructive: "border-red-500/50 bg-red-50 text-foreground",
       },
     },
     defaultVariants: {

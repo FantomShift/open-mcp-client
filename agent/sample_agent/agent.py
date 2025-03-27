@@ -13,6 +13,7 @@ from copilotkit import CopilotKitState
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 import os
+import sys
 
 # Define the connection type structures
 class StdioConnection(TypedDict):
@@ -39,15 +40,27 @@ class AgentState(CopilotKitState):
     mcp_config: Optional[MCPConfig]
 
 # Default MCP configuration to use when no configuration is provided in the state
-# Uses relative paths that will work within the project structure
-DEFAULT_MCP_CONFIG: MCPConfig = {
-    "math": {
-        "command": "python",
-        # Use a relative path that will be resolved based on the current working directory
-        "args": [os.path.join(os.path.dirname(__file__), "..", "math_server.py")],
-        "transport": "stdio",
-    },
-}
+# Uses different transport methods based on the platform
+DEFAULT_MCP_CONFIG: MCPConfig = {}
+
+if sys.platform.startswith('win'):
+    # Use SSE transport on Windows
+    DEFAULT_MCP_CONFIG = {
+        "math": {
+            "url": "http://localhost:8765",
+            "transport": "sse",
+        },
+    }
+else:
+    # Use stdio on other platforms
+    DEFAULT_MCP_CONFIG = {
+        "math": {
+            "command": "python",
+            # Use a relative path that will be resolved based on the current working directory
+            "args": [os.path.join(os.path.dirname(__file__), "..", "math_server.py")],
+            "transport": "stdio",
+        },
+    }
 
 async def chat_node(state: AgentState, config: RunnableConfig) -> Command[Literal["__end__"]]:
     """
@@ -56,8 +69,6 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[Litera
     """
     # Get MCP configuration from state, or use the default config if not provided
     mcp_config = state.get("mcp_config", DEFAULT_MCP_CONFIG)
-
-    print(f"mcp_config: {mcp_config}, default: {DEFAULT_MCP_CONFIG}")
     
     # Set up the MCP client and tools using the configuration from state
     async with MultiServerMCPClient(mcp_config) as mcp_client:

@@ -63,23 +63,34 @@ export function ServiceCatalog() {
           
           // Handle both the new array field and the old config object
           if (connections.connected_services && Array.isArray(connections.connected_services)) {
-            connectedIds.push(...connections.connected_services);
+            // Normalize service IDs from connected_services array
+            connections.connected_services.forEach(serviceId => {
+              const normalizedId = normalizeServiceId(serviceId);
+              if (!connectedIds.includes(normalizedId)) {
+                connectedIds.push(normalizedId);
+              }
+            });
           }
           
           // Get URLs from config
           if (connections.config && typeof connections.config === 'object') {
             // Add any services from config that aren't already in connected_services
             Object.keys(connections.config).forEach(serviceId => {
-              if (!connectedIds.includes(serviceId)) {
-                connectedIds.push(serviceId);
+              // Normalize service ID for matching with UI
+              const normalizedId = normalizeServiceId(serviceId);
+              
+              if (!connectedIds.includes(normalizedId)) {
+                connectedIds.push(normalizedId);
               }
               
               // Store the URL for this service
               if (connections.config[serviceId]?.url) {
-                urls[serviceId] = connections.config[serviceId].url;
+                urls[normalizedId] = connections.config[serviceId].url;
               }
             });
           }
+          
+          console.log('Connected services normalized:', connectedIds);
           
           // Update state with connected services and their URLs
           setConnectedServices(connectedIds);
@@ -97,6 +108,27 @@ export function ServiceCatalog() {
     }
   }, []);
 
+  // Helper function to normalize service IDs
+  const normalizeServiceId = (serviceId: string): string => {
+    // Convert to lowercase
+    let normalized = serviceId.toLowerCase();
+    
+    // Remove spaces
+    normalized = normalized.replace(/\s+/g, '');
+    
+    // Special case for "google sheets" -> "googlesheets"
+    if (normalized === 'googlesheets' || normalized === 'googlesheet') {
+      return 'googlesheets';
+    }
+    
+    // Special case for "googledocs" -> "googlesheets" (if needed)
+    if (normalized === 'googledocs') {
+      return 'googlesheets';
+    }
+    
+    return normalized;
+  };
+
   // Check URL parameters for connection status
   useEffect(() => {
     // Check query parameters for connection status
@@ -105,19 +137,31 @@ export function ServiceCatalog() {
     const errorParam = searchParams.get('error');
     
     // If there was a successful connection
-    if (successParam && successParam.startsWith('connected_')) {
-      const serviceName = successParam.replace('connected_', '');
-      addToast({
-        title: "Connection Successful",
-        description: `Successfully connected to ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}`,
-        variant: "success",
-      });
+    if (successParam) {
+      if (successParam.startsWith('connected_')) {
+        const serviceName = successParam.replace('connected_', '');
+        addToast({
+          title: "Connection Successful",
+          description: `Successfully connected to ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}`,
+          variant: "success",
+        });
+        
+        // Refresh connected services data
+        fetchUserConnections();
+      } else if (successParam.startsWith('authorized_')) {
+        const serviceName = successParam.replace('authorized_', '');
+        addToast({
+          title: "Authorization Successful",
+          description: `Successfully authorized ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}`,
+          variant: "success",
+        });
+        
+        // Refresh connected services data
+        fetchUserConnections();
+      }
       
       // Clear URL parameters by using replaceState
       window.history.replaceState({}, document.title, window.location.pathname);
-      
-      // Refresh connected services data
-      fetchUserConnections();
     }
     
     // If there was an error with connection
@@ -195,43 +239,9 @@ export function ServiceCatalog() {
     
     setConnectionInProgress(serviceId);
     try {
-      // Step 1: Check if a connection already exists and if it's authorized
-      const statusResponse = await fetch('/api/mcp-connection-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ serviceId }),
-      });
+      console.log(`Initiating connection to ${serviceId}`);
       
-      if (!statusResponse.ok) {
-        const errorData = await statusResponse.json();
-        throw new Error(errorData.error || 'Failed to check connection status');
-      }
-      
-      const statusData = await statusResponse.json();
-      
-      // Step 2: Handle based on connection status
-      if (statusData.isConnected && statusData.isAuthorized) {
-        // Already connected and authorized
-        addToast({
-          title: "Already Connected",
-          description: `You're already connected to ${serviceId}. You can now use this service.`,
-          variant: "success",
-        });
-        setConnectionInProgress(null);
-        return;
-      } else if (statusData.isConnected && !statusData.isAuthorized) {
-        // Connected but not authorized - need to reauthorize
-        addToast({
-          title: "Re-authorization Required",
-          description: `Your connection to ${serviceId} needs to be reauthorized.`,
-          variant: "warning",
-        });
-        // Continue to the re-authorization flow
-      }
-      
-      // Step 3: Initiate a connection (either new or reauthorization)
+      // Initiate a connection - this now immediately adds the service to user_connections
       const response = await fetch('/api/mcp-connect', {
         method: 'POST',
         headers: {
@@ -240,42 +250,71 @@ export function ServiceCatalog() {
         body: JSON.stringify({ serviceId }),
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to initiate connection');
-      }
-      
       const data = await response.json();
       
-      // Step 4: Provide the authentication link
+      if (!response.ok) {
+        console.error(`Error response from mcp-connect:`, data);
+        throw new Error(data.error || `Failed to initiate connection to ${serviceId}`);
+      }
       
-      if (agentMode) {
-        // In agent chat mode, we store the auth link to display in the UI
-        // This mimics how an agent would provide the link in chat
-        setAuthLinks(prev => ({
+      console.log(`Got service URL for ${serviceId}:`, data.redirectUrl);
+      
+      // Immediately update the list of connected services since it's now connected in the database
+      // This will make the UI show the service as "Connected" right away
+      const updatedConnectedServices = [...connectedServices, serviceId];
+      setConnectedServices(updatedConnectedServices);
+      
+      // Update service URL if applicable
+      if (data.redirectUrl) {
+        setServiceUrls(prev => ({
           ...prev,
           [serviceId]: data.redirectUrl
         }));
-        
-        addToast({
-          title: "Authorization Required",
-          description: `Please use the provided authorization link to connect to ${serviceId}.`,
-          variant: "info",
-        });
-      } else {
-        // In direct mode, we redirect the user to the auth page
-        window.location.href = data.redirectUrl;
       }
       
-      setConnectionInProgress(null);
+      // Show success message
+      addToast({
+        title: "Service Connected",
+        description: `Successfully connected to ${serviceId}. You can now use this service.`,
+        variant: "success",
+        duration: 5000,
+      });
+      
+      // Handle the optional authorization URL based on the chosen mode
+      if (data.redirectUrl) {
+        if (agentMode) {
+          // In agent mode, display the auth link for the user to click
+          setAuthLinks(prev => ({
+            ...prev,
+            [serviceId]: data.redirectUrl
+          }));
+          
+          addToast({
+            title: "Optional: Authorize Access",
+            description: `You can visit the service URL to authorize access to ${serviceId}.`,
+            variant: "info",
+            duration: 10000,
+          });
+        } else {
+          // In direct mode, offer to open the service URL in a new tab
+          if (confirm(`Would you like to open ${serviceId} in a new tab to authorize access?`)) {
+            window.open(data.redirectUrl, '_blank');
+          }
+        }
+      }
       
     } catch (error) {
       console.error("Error connecting to service:", error);
       addToast({
         title: "Connection Failed",
-        description: error instanceof Error ? error.message : "Failed to connect to service.",
+        description: error instanceof Error 
+          ? `Error: ${error.message}` 
+          : `Failed to connect to ${serviceId}. Please try again.`,
         variant: "destructive",
+        duration: 8000,
       });
+    } finally {
+      // We're done with the connection process
       setConnectionInProgress(null);
     }
   };
@@ -351,10 +390,14 @@ export function ServiceCatalog() {
       {/* Services grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredServices.map(service => {
-          const isConnected = connectedServices.includes(service.id);
+          // Normalize the service ID for comparison with our connected services list
+          const normalizedServiceId = normalizeServiceId(service.id);
+          const isConnected = connectedServices.includes(normalizedServiceId);
           const isConnecting = connectionInProgress === service.id;
           const authLink = authLinks[service.id];
-          const serverUrl = serviceUrls[service.id];
+          const serverUrl = serviceUrls[normalizedServiceId];
+          
+          console.log(`Service: ${service.name}, ID: ${service.id}, Normalized: ${normalizedServiceId}, Connected: ${isConnected}`);
           
           return (
             <MCPServiceIntegrationCard

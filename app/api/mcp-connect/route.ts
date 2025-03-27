@@ -12,6 +12,27 @@ const MCP_SERVER_URLS: Record<string, string> = {
   // Usually these would be dynamically retrieved from Composio's API
 };
 
+// Helper function to normalize service ID
+function normalizeServiceId(serviceId: string): string {
+  // Convert to lowercase
+  let normalized = serviceId.toLowerCase();
+  
+  // Remove spaces
+  normalized = normalized.replace(/\s+/g, '');
+  
+  // Special case for "google sheets" -> "googlesheets"
+  if (normalized === 'googlesheets' || normalized === 'googlesheet') {
+    return 'googlesheets';
+  }
+  
+  // Special case for "googledocs" -> "googlesheets" (if needed)
+  if (normalized === 'googledocs') {
+    return 'googlesheets';
+  }
+  
+  return normalized;
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = cookies();
@@ -38,51 +59,89 @@ export async function POST(request: Request) {
       );
     }
     
-    // Generate a state parameter for OAuth flow
-    const state = Math.random().toString(36).substring(2, 15);
+    // Normalize the service ID
+    const normalizedServiceId = normalizeServiceId(serviceId);
     
-    // Store the connection request in database
-    const { data: connectionRequest, error } = await supabase
-      .from('connection_requests')
-      .insert({
-        user_id: user.id,
-        service_id: serviceId,
-        state,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-      })
-      .select()
+    // Generate the service URL that will be shown to the user
+    let serviceUrl = MCP_SERVER_URLS[normalizedServiceId];
+    
+    if (!serviceUrl) {
+      // For services not in our predefined list, use a default format
+      // This should match the format the agent uses for direct connections
+      serviceUrl = `https://mcp.composio.dev/${normalizedServiceId === 'googlesheets' ? 'googledocs' : normalizedServiceId}/crooked-shy-guitar-OQDWNt`;
+    }
+    
+    console.log(`Generated service URL: ${serviceUrl}`);
+    
+    // First, fetch current user connections
+    const { data: userConnections } = await supabase
+      .from('user_connections')
+      .select('*')
+      .eq('user_id', user.id)
       .single();
     
-    if (error) {
-      console.error('Error creating connection request:', error);
+    let updatedConnections;
+    
+    if (userConnections) {
+      // User has existing connections
+      const connectedServices = userConnections.connected_services || [];
+      const config = userConnections.config || {};
+      
+      // Normalize connected services for comparison
+      const normalizedConnectedServices = connectedServices.map(svc => normalizeServiceId(svc));
+      
+      // Prepare the updated connection data
+      // Make sure to update both connected_services array AND config object
+      updatedConnections = {
+        user_id: user.id,
+        config: {
+          ...config,
+          [normalizedServiceId]: {
+            url: serviceUrl,
+            transport: "sse" 
+          }
+        },
+        connected_services: [...new Set([...normalizedConnectedServices, normalizedServiceId])], // Use Set to avoid duplicates
+        updated_at: new Date().toISOString()
+      };
+    } else {
+      // User has no connections, create a new record
+      updatedConnections = {
+        user_id: user.id,
+        config: {
+          [normalizedServiceId]: {
+            url: serviceUrl,
+            transport: "sse"
+          }
+        },
+        connected_services: [normalizedServiceId],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    }
+    
+    console.log("Updating user connections with:", JSON.stringify(updatedConnections));
+    
+    // Update the user connections
+    const { error: upsertError } = await supabase
+      .from('user_connections')
+      .upsert(updatedConnections, {
+        onConflict: 'user_id'
+      });
+    
+    if (upsertError) {
+      console.error('Error updating user connections:', upsertError);
       return NextResponse.json(
-        { error: 'Failed to create connection request' },
+        { error: 'Failed to add service connection' },
         { status: 500 }
       );
     }
     
-    // Use the predefined MCP server URL or construct a generic one
-    // In a real implementation, you would call Composio's API to get this URL
-    let mcpServerUrl = MCP_SERVER_URLS[serviceId];
-    
-    if (!mcpServerUrl) {
-      // Mimic how the agent interacts with services
-      // This would normally come from Composio's API
-      
-      // In a real implementation with the Composio client, this would be:
-      // const composioClient = new ComposioClient(process.env.COMPOSIO_API_KEY);
-      // const { url } = await composioClient.getServerUrl(serviceId);
-      // mcpServerUrl = url;
-      
-      // But since we don't have that, we'll use their standard URL pattern
-      mcpServerUrl = `https://mcp.composio.dev/${serviceId}/connect`;
-    }
-    
+    // Simply return the direct service URL
     return NextResponse.json({
-      redirectUrl: mcpServerUrl,
-      state,
-      connectionRequestId: connectionRequest.id
+      redirectUrl: serviceUrl,
+      serviceId: normalizedServiceId,
+      isConnected: true
     });
     
   } catch (error) {

@@ -1,161 +1,69 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+
+// Helper function to normalize service ID
+function normalizeServiceId(serviceId: string): string {
+  // Convert to lowercase
+  let normalized = serviceId.toLowerCase();
+  
+  // Remove spaces
+  normalized = normalized.replace(/\s+/g, '');
+  
+  // Special case for "google sheets" -> "googlesheets"
+  if (normalized === 'googlesheets' || normalized === 'googlesheet') {
+    return 'googlesheets';
+  }
+  
+  // Special case for "googledocs" -> "googlesheets" (if needed)
+  if (normalized === 'googledocs') {
+    return 'googlesheets';
+  }
+  
+  return normalized;
+}
 
 export async function GET(request: Request) {
+  // Add logging to debug callback issues
+  console.log("Callback received:", request.url);
+  
   try {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { searchParams } = new URL(request.url);
     
-    // Get state and code from query parameters
-    const state = searchParams.get('state');
-    const code = searchParams.get('code');
+    // Log all search params for debugging
+    console.log("Callback params:", Object.fromEntries(searchParams.entries()));
+    
+    // Get service from query parameters
     const service = searchParams.get('service');
     
-    if (!state || !code) {
-      return new Response('Missing state or code parameter', { status: 400 });
+    if (!service) {
+      console.error("Missing service parameter in callback");
+      return new Response('Missing service parameter', { status: 400 });
     }
+    
+    // Normalize the service ID
+    const normalizedServiceId = normalizeServiceId(service);
     
     // Verify user is authenticated
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
+      console.error("User not authenticated in callback");
       // Redirect to login page
       return NextResponse.redirect(new URL('/login', request.url));
     }
     
-    // Find the connection request by state
-    const { data: connectionRequest, error: fetchError } = await supabase
-      .from('connection_requests')
-      .select('*')
-      .eq('state', state)
-      .eq('user_id', user.id)
-      .eq('status', 'pending')
-      .single();
+    console.log(`Processing callback for service: ${normalizedServiceId}`);
     
-    if (fetchError || !connectionRequest) {
-      console.error('Error finding connection request:', fetchError);
-      return NextResponse.redirect(
-        new URL(`/?error=invalid_state`, request.url)
-      );
-    }
-    
-    // In a production implementation, we would:
-    // 1. Exchange the code for tokens with Composio's API
-    // 2. Store the tokens securely
-    
-    // Update connection request status
-    const { error: updateError } = await supabase
-      .from('connection_requests')
-      .update({
-        status: 'connected',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', connectionRequest.id);
-    
-    if (updateError) {
-      console.error('Error updating connection request:', updateError);
-      return NextResponse.redirect(
-        new URL(`/?error=connection_failed`, request.url)
-      );
-    }
-    
-    // Add to connected services
-    const { data: userConnections, error: connectionsError } = await supabase
-      .from('user_connections')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (connectionsError && connectionsError.code !== 'PGRST116') {
-      console.error('Error fetching user connections:', connectionsError);
-    }
-    
-    // Use the service from the query params if available, otherwise use from the connection request
-    const serviceId = service || connectionRequest.service_id;
-    
-    // Determine what structure to use based on what exists
-    if (userConnections) {
-      // If the user has existing connections
-      let updatedConnections;
-      
-      if (userConnections.connected_services) {
-        // If the user has the new connected_services array
-        const connectedServices = userConnections.connected_services || [];
-        
-        if (!connectedServices.includes(serviceId)) {
-          // Update the connected_services array
-          updatedConnections = {
-            user_id: user.id,
-            connected_services: [...connectedServices, serviceId],
-            updated_at: new Date().toISOString()
-          };
-        }
-      } else {
-        // If the user has the old config object structure
-        const config = userConnections.config || {};
-        
-        // Add the new service to the config object
-        if (!config[serviceId]) {
-          const updatedConfig = { 
-            ...config,
-            [serviceId]: { 
-              url: `https://mcp.composio.dev/${serviceId}/${serviceId === 'googledocs' ? 'crooked-shy-guitar-OQDWNt' : 'crooked-shy-guitar-OQDWNt'}`,
-              transport: "sse"
-            }
-          };
-          
-          updatedConnections = {
-            user_id: user.id,
-            config: updatedConfig,
-            connected_services: Object.keys(updatedConfig),
-            updated_at: new Date().toISOString()
-          };
-        }
-      }
-      
-      // Only update if there are changes
-      if (updatedConnections) {
-        const { error: upsertError } = await supabase
-          .from('user_connections')
-          .upsert(updatedConnections, {
-            onConflict: 'user_id'
-          });
-        
-        if (upsertError) {
-          console.error('Error updating user connections:', upsertError);
-        }
-      }
-    } else {
-      // If the user has no connections at all, create a new record with both structures
-      // This ensures compatibility with both old and new code
-      const newConnections = {
-        user_id: user.id,
-        config: {
-          [serviceId]: { 
-            url: `https://mcp.composio.dev/${serviceId}/${serviceId === 'googledocs' ? 'crooked-shy-guitar-OQDWNt' : 'crooked-shy-guitar-OQDWNt'}`,
-            transport: "sse"
-          }
-        },
-        connected_services: [serviceId],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      const { error: insertError } = await supabase
-        .from('user_connections')
-        .insert(newConnections);
-      
-      if (insertError) {
-        console.error('Error creating user connections:', insertError);
-      }
-    }
+    // The service is already added to user_connections when they clicked connect
+    // We don't need to update the database here
+    // Instead, we just redirect back with a success message
     
     // Redirect back with success message
     return NextResponse.redirect(
-      new URL(`/?success=connected_${serviceId}`, request.url)
+      new URL(`/?success=authorized_${normalizedServiceId}`, request.url)
     );
     
   } catch (error) {

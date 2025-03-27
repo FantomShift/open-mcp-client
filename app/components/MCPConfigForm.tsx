@@ -174,23 +174,23 @@ export function MCPConfigForm() {
               />
             </svg>
             <h1 className="text-3xl sm:text-5xl font-semibold">
-              Open MCP Client
+              Integrations
             </h1>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <p className="text-sm text-gray-600">
-              Manage and configure your MCP servers
+              Add new connections to your services
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="https://github.com/CopilotKit/mcp-client-langgraph"
+                href="https://mcp.composio.dev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
               >
-                <span className="mr-1">GitHub Repo</span>
+                <span className="mr-1">MCP.dev</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-3.5 w-3.5"
@@ -206,28 +206,7 @@ export function MCPConfigForm() {
                   />
                 </svg>
               </a>
-              <a
-                href="https://docs.copilotkit.ai/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-              >
-                <span className="mr-1">Documentation</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </a>
+             
             </div>
           </div>
           <button
@@ -303,7 +282,7 @@ export function MCPConfigForm() {
 
       {/* Server List */}
       <div className="bg-white border rounded-md p-6">
-        <h2 className="text-lg font-semibold mb-4">Server List</h2>
+        <h2 className="text-lg font-semibold mb-4">Services</h2>
 
         {totalServers === 0 ? (
           <div className="text-gray-500 text-center py-10">
@@ -358,6 +337,7 @@ export function MCPConfigForm() {
                     <button
                       onClick={() => removeConfig(name)}
                       className="text-gray-400 hover:text-red-500"
+                      aria-label={`Remove ${name} configuration`}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -443,6 +423,7 @@ export function MCPConfigForm() {
               <button
                 onClick={() => setShowAddServerForm(false)}
                 className="text-gray-500 hover:text-gray-700"
+                aria-label="Close"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

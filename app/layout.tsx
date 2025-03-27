@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@copilotkit/react-ui/styles.css";
 import { CopilotKit } from "@copilotkit/react-core";
+import { Providers } from "./components/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Open MCP Client",
-  description: "An open source MCP client built with CopilotKit 🪁",
+  title: "UIP Admin",
+  description: "UI for agent assisted administration",
 };
 
 export default function RootLayout({
@@ -27,14 +28,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-screen overflow-hidden`}
       >
         <CopilotKit
           runtimeUrl="/api/copilotkit"
           agent="sample_agent"
           showDevConsole={false}
         >
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </CopilotKit>
       </body>
     </html>

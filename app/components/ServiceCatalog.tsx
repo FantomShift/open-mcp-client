@@ -26,7 +26,6 @@ export function ServiceCatalog() {
   const [isLoading, setIsLoading] = useState(true);
   const [connectionInProgress, setConnectionInProgress] = useState<string | null>(null);
   const [authLinks, setAuthLinks] = useState<Record<string, string>>({});
-  const [useAgentMode, setUseAgentMode] = useState(true); // Default to agent mode to always show auth links
   const { addToast } = useToast();
 
   // Get all available categories
@@ -354,7 +353,7 @@ export function ServiceCatalog() {
       
       // Handle the authorization URL from Composio for OAuth
       if (authorizationUrl) {
-        // Always display the auth link for the user to click (agent mode)
+        // Always display the auth link for the user to click
         console.log(`Setting auth link for ${normalizedServiceId}:`, authorizationUrl);
         
         setAuthLinks(prev => {
@@ -586,57 +585,7 @@ export function ServiceCatalog() {
             </svg>
           </button>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Connection mode:</span>
-          <div className="flex items-center space-x-2">
-            <span className={`text-xs ${!useAgentMode ? "font-medium text-blue-600" : "text-gray-500"}`}>Direct</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={useAgentMode}
-                onChange={() => setUseAgentMode(!useAgentMode)}
-                aria-label="Toggle agent mode"
-                title="Toggle between direct and agent-style connection modes"
-              />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            <span className={`text-xs ${useAgentMode ? "font-medium text-blue-600" : "text-gray-500"}`}>Agent-style</span>
-          </div>
-          <button 
-            className="text-blue-500 hover:text-blue-700 text-xs flex items-center"
-            onClick={() => {
-              addToast({
-                title: "Connection Modes",
-                description: "Direct mode redirects you immediately. Agent-style mode shows an authorization link like an AI agent would in chat.",
-                variant: "info",
-              });
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-            </svg>
-            Help
-          </button>
-        </div>
       </div>
-      
-      {/* Debug info - only shown in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-gray-100 p-3 rounded-md mb-4 text-xs">
-          <h3 className="font-semibold mb-1">Debug Info:</h3>
-          <div>
-            <span className="font-semibold">Connected Services:</span>{' '}
-            {connectedServices.length > 0 
-              ? connectedServices.map(s => `"${s}"`).join(', ') 
-              : 'None'}
-          </div>
-          <div className="mt-1">
-            <span className="font-semibold">Last Refresh:</span>{' '}
-            {new Date().toLocaleTimeString()}
-          </div>
-        </div>
-      )}
       
       {/* Category tabs */}
       <div className="border-b border-gray-200">

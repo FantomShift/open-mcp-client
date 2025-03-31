@@ -15,7 +15,10 @@ import {
   ChevronDown, 
   User,
   Menu,
-  MessageSquare
+  MessageSquare,
+  ChevronRight,
+  ChevronLeft,
+  PanelRightOpen
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -34,13 +37,15 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { IntegrationDashboard } from "./components/IntegrationDashboard";
 import { Button } from "@/components/ui/button";
+import { ConnectedServicesBar } from "./components/ConnectedServicesBar";
 
 export default function Home() {
   const router = useRouter();
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  const [isIntegrationsOpen, setIsIntegrationsOpen] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserLoading, setIsUserLoading] = useState(true);
+  const [connectedServices, setConnectedServices] = useState<string[]>([]);
   const [user, setUser] = useState<{
     name: string;
     email: string;
@@ -49,6 +54,11 @@ export default function Home() {
     name: "Loading...",
     email: "loading@example.com",
   });
+
+  // Toggle between chat and integrations in the main panel
+  const toggleMainPanel = () => {
+    setIsIntegrationsOpen(!isIntegrationsOpen);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -65,6 +75,17 @@ export default function Home() {
             email: userData.email || "No email provided",
             avatar: userData.user_metadata?.avatar_url,
           });
+          
+          // Fetch user's connected services
+          const { data: userConnections } = await supabase
+            .from('user_connections')
+            .select('*')
+            .eq('user_id', userData.id)
+            .single();
+            
+          if (userConnections && userConnections.connected_services) {
+            setConnectedServices(userConnections.connected_services);
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -116,7 +137,7 @@ export default function Home() {
       {/* Sidebar - Desktop */}
       <motion.div
         className={cn(
-          "fixed inset-y-0 left-0 z-20 bg-white border-r border-gray-200 transition-all duration-300 hidden md:flex md:flex-col",
+          "fixed inset-y-0 left-0 z-30 bg-white border-r border-gray-200 transition-all duration-300 hidden md:flex md:flex-col",
           isSidebarOpen ? "w-64" : "w-20"
         )}
         initial={false}
@@ -143,26 +164,7 @@ export default function Home() {
             className="p-1.5 rounded-md hover:bg-gray-100"
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              {isSidebarOpen ? (
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              ) : (
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              )}
-            </svg>
+            {isSidebarOpen ? <ChevronLeft className="h-5 w-5 text-gray-500" /> : <ChevronRight className="h-5 w-5 text-gray-500" />}
           </button>
         </div>
         
@@ -222,7 +224,7 @@ export default function Home() {
       {/* Mobile sidebar backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-10 bg-black/50 md:hidden"
+          className="fixed inset-0 z-20 bg-black/50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         ></div>
       )}
@@ -230,7 +232,7 @@ export default function Home() {
       {/* Mobile sidebar */}
       <motion.div
         className={cn(
-          "fixed inset-y-0 left-0 z-20 w-64 bg-white border-r border-gray-200 md:hidden transform transition-transform duration-300",
+          "fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 md:hidden transform transition-transform duration-300",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
         initial={false}
@@ -248,18 +250,7 @@ export default function Home() {
             className="p-1.5 rounded-md hover:bg-gray-100"
             aria-label="Close mobile menu"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <ChevronLeft className="h-5 w-5 text-gray-500" />
           </button>
         </div>
         
@@ -296,24 +287,52 @@ export default function Home() {
         </div>
       </motion.div>
       
-      {/* Main content */}
-      <div className={cn(
-        "flex-1 flex flex-col transition-all duration-300",
-        isSidebarOpen ? "md:ml-64" : "md:ml-20",
-        isChatOpen ? "lg:mr-[30vw]" : ""
-      )}>
+      {/* Main layout - full width single panel that toggles between integrations and chat */}
+      <div 
+        className={cn(
+          "flex-1 flex flex-col transition-all duration-300",
+          isSidebarOpen ? "md:ml-64" : "md:ml-20"
+        )}
+      >
         {/* Header */}
-        <header className="z-10 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
+        <header className="z-30 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 sticky top-0">
           {/* Left section with mobile menu toggle */}
           <div className="flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-1.5 rounded-md hover:bg-gray-100 md:hidden"
+              className="p-1.5 rounded-md hover:bg-gray-100 md:hidden mr-2"
               aria-label="Open mobile menu"
             >
               <Menu className="h-5 w-5 text-gray-500" />
             </button>
-
+            
+            {/* Add Chat button at the beginning of connected services */}
+            <Button
+              variant={isIntegrationsOpen ? "default" : "outline"}
+              onClick={toggleMainPanel}
+              size="sm"
+              className="mr-3 gap-2 hidden md:flex"
+            >
+              {isIntegrationsOpen ? (
+                <>
+                  <MessageSquare className="h-4 w-4" /> 
+                  <span>Open Chat</span>
+                </>
+              ) : (
+                <>
+                  <PanelRightOpen className="h-4 w-4" /> 
+                  <span>Show Integrations</span>
+                </>
+              )}
+            </Button>
+            
+            {/* Show connected integrations as icons */}
+            <ConnectedServicesBar 
+              connectedServices={connectedServices}
+              onManageIntegrations={() => {
+                if (!isIntegrationsOpen) toggleMainPanel();
+              }}
+            />
           </div>
           
           {/* Right section with search, notifications, and profile */}
@@ -327,17 +346,6 @@ export default function Home() {
                 className="w-[200px] pl-9 pr-4 py-2 rounded-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
-            {/* Chat toggle for desktop */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className="flex"
-              aria-label={isChatOpen ? "Close chat" : "Open chat"}
-            >
-              <MessageSquare className="h-5 w-5 text-gray-600" />
-            </Button>
             
             {/* Notifications */}
             <button 
@@ -400,78 +408,74 @@ export default function Home() {
           </div>
         </header>
         
-        {/* Main content area */}
-        <main className="flex-1 overflow-auto">
-          <IntegrationDashboard />
-        </main>
+        {/* Main content - single panel that toggles between integrations and chat */}
+        <div className="flex-1 h-[calc(100vh-4rem)] overflow-auto">
+          {/* Integrations panel */}
+          <div 
+            className={cn(
+              "h-full transition-all duration-300 overflow-auto",
+              isIntegrationsOpen ? "block" : "hidden"
+            )}
+          >
+            {/* Connected services summary and integrations content */}
+            <div className="bg-white p-4 md:p-6 flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-bold">Service Integrations</h1>
+                <p className="text-sm text-gray-500">Connect your assistant to external services</p>
+              </div>
+            </div>
+            
+            <IntegrationDashboard />
+          </div>
+          
+          {/* Chat panel */}
+          <div 
+            className={cn(
+              "h-full bg-white transition-all duration-300",
+              !isIntegrationsOpen ? "block" : "hidden"
+            )}
+            style={
+              {
+                "--copilot-kit-primary-color": "#4F4F4F",
+              } as CopilotKitCSSProperties
+            }
+          >
+            <div className="bg-white p-4 md:p-6 flex items-center justify-between border-b">
+              <div>
+                <h1 className="text-xl font-bold">MCP Assistant</h1>
+                <p className="text-sm text-gray-500">Ask questions about your integrations</p>
+              </div>
+            </div>
+            
+            <div className="h-[calc(100vh-8rem)]">
+              <CopilotChat
+                className="h-full flex flex-col"
+                instructions={
+                  "You are assisting the user as best as you can with their Multi-Channel Platform (MCP) integration needs. Answer in the best way possible given the data you have."
+                }
+                labels={{
+                  title: "MCP Assistant",
+                  initial: "Need any help with your integrations?",
+                  error: "The agent server is currently unavailable. Please run the start_agent.bat script in the agent folder to start the server.",
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
       
-      {/* Mobile chat toggle button */}
+      {/* Mobile toggle button */}
       <button
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        className={cn(
-          "fixed bottom-4 right-4 z-30 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700",
-          isChatOpen && "right-[calc(30vw+1rem)]"
-        )}
-        aria-label="Toggle chat"
+        onClick={toggleMainPanel}
+        className="fixed bottom-4 right-4 z-30 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 md:hidden"
+        aria-label={isIntegrationsOpen ? "Open chat" : "Show integrations"}
       >
-        {isChatOpen ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+        {isIntegrationsOpen ? (
+          <MessageSquare className="h-6 w-6" />
         ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
+          <PanelRightOpen className="h-6 w-6" />
         )}
       </button>
-      
-      {/* Fixed chat sidebar */}
-      <div
-        className={cn(
-          "fixed top-16 right-0 h-[calc(100vh-4rem)] w-full md:w-[80vw] lg:w-[30vw] border-l bg-white shadow-md transition-transform duration-300 z-20",
-          isChatOpen ? "translate-x-0" : "translate-x-full"
-        )}
-        style={
-          {
-            "--copilot-kit-primary-color": "#4F4F4F",
-          } as CopilotKitCSSProperties
-        }
-      >
-        <CopilotChat
-          className="h-full flex flex-col"
-          instructions={
-            "You are assisting the user as best as you can with their Multi-Channel Platform (MCP) integration needs. Answer in the best way possible given the data you have."
-          }
-          labels={{
-            title: "MCP Assistant",
-            initial: "Need any help with your integrations?",
-            error: "The agent server is currently unavailable. Please run the start_agent.bat script in the agent folder to start the server.",
-          }}
-        />
-      </div>
     </div>
   );
 }

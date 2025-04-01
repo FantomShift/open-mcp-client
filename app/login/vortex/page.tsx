@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
-import { BackgroundBeams } from "@/components/ui/background-beams";
+import { Vortex } from "@/components/ui/vortex";
 import { useTheme } from "@/app/components/providers";
 
-export default function LoginPage() {
+export default function VortexLoginPage() {
   const router = useRouter();
   const supabase = createClient();
   const [isLogin, setIsLogin] = useState(true);
@@ -98,27 +98,32 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left side - Animated background */}
-      <div className="hidden md:flex md:w-1/2 relative overflow-hidden bg-blue-600 dark:bg-black flex-col justify-between p-10">
-        <BackgroundBeams />
-        <div className="relative z-10 max-w-md">
-          <div className="flex items-center mb-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white">
-              <span className="text-blue-600 font-bold text-xl">UI</span>
+      {/* Left side - Vortex animation */}
+      <div className="hidden md:flex md:w-1/2 relative overflow-hidden">
+        <Vortex 
+          backgroundColor={theme === 'dark' ? "#000000" : "#1e40af"} 
+          baseHue={220}
+          className="flex items-center flex-col justify-between p-10 w-full h-full"
+        >
+          <div className="relative z-10 w-full max-w-md">
+            <div className="flex items-center mb-8">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white">
+                <span className="text-blue-600 font-bold text-xl">UI</span>
+              </div>
+              <span className="ml-3 text-white font-semibold text-xl">UIP Admin</span>
             </div>
-            <span className="ml-3 text-white font-semibold text-xl">UIP Admin</span>
+            
+            <h1 className="text-4xl font-bold text-white mb-4">Welcome to UIP Admin</h1>
+            <p className="text-blue-100 text-lg">
+              Log in to access your account or register for full access to our
+              powerful administration tools.
+            </p>
           </div>
           
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome to UIP Admin</h1>
-          <p className="text-blue-100 text-lg">
-            Log in to access your account or register for full access to our
-            powerful administration tools.
-          </p>
-        </div>
-        
-        <div className="relative z-10 text-blue-100 text-sm">
-          © {new Date().getFullYear()} UIP Admin. All rights reserved.
-        </div>
+          <div className="relative z-10 text-blue-100 text-sm w-full">
+            © {new Date().getFullYear()} UIP Admin. All rights reserved.
+          </div>
+        </Vortex>
       </div>
       
       {/* Right side - Login form */}
@@ -153,7 +158,7 @@ export default function LoginPage() {
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-2 text-sm font-medium ${
                   isLogin
-                    ? "text-blue-600 dark:text-white border-b-2 border-blue-600 dark:border-white"
+                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
@@ -163,7 +168,7 @@ export default function LoginPage() {
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-2 text-sm font-medium ${
                   !isLogin
-                    ? "text-blue-600 dark:text-white border-b-2 border-blue-600 dark:border-white"
+                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
@@ -234,7 +239,7 @@ export default function LoginPage() {
                   {isLogin && (
                     <button
                       type="button"
-                      className="text-xs text-blue-600 dark:text-white hover:text-blue-800 dark:hover:text-gray-300"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                       disabled={loading}
                     >
                       Forgot password?

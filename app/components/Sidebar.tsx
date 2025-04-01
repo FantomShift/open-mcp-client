@@ -76,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       {/* Desktop sidebar */}
       <motion.div
         className={cn(
-          "fixed top-0 left-0 z-40 h-full bg-white border-r transition-all md:block",
+          "fixed top-0 left-0 z-40 h-full bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 transition-all md:block",
           expanded ? "w-64" : "w-20",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
           className
@@ -86,16 +86,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* Mobile close button */}
         <button
           onClick={toggleMobile}
-          className="absolute top-4 right-4 p-1 md:hidden"
+          className="absolute top-4 right-4 p-1 md:hidden text-gray-500 dark:text-gray-400"
           aria-label="Close sidebar"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Logo area */}
-        <div className="flex items-center justify-between h-16 px-4 border-b">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
           <Link href="/" className="flex items-center">
-            <div className="h-8 w-8 bg-gray-800 rounded-md flex items-center justify-center">
+            <div className="h-8 w-8 bg-gray-800 dark:bg-black rounded-md flex items-center justify-center">
               <span className="text-white font-bold">UI</span>
             </div>
             {expanded && (
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="ml-3 font-semibold text-gray-800"
+                className="ml-3 font-semibold text-gray-800 dark:text-gray-100"
               >
                 UIP Admin
               </motion.span>
@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </Link>
           <button
             onClick={toggleSidebar}
-            className="p-1 rounded-md hover:bg-gray-100 hidden md:block"
+            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hidden md:block"
             aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
           >
             {expanded ? (
@@ -132,8 +132,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                   className={cn(
                     "flex items-center px-3 py-2 rounded-md transition-colors",
                     item.active
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-gray-100 dark:bg-black text-gray-900 dark:text-white"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/60 hover:text-gray-900 dark:hover:text-gray-200"
                   )}
                 >
                   <span className="flex-shrink-0">{item.icon}</span>
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <div className="flex items-center px-3 py-2 text-sm text-gray-600">
+          <div className="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
             <span className="flex-shrink-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

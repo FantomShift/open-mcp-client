@@ -537,8 +537,8 @@ export function ServiceCatalog() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-        <span className="ml-2">Loading services...</span>
+        <Loader2 className="h-8 w-8 text-blue-500 dark:text-white animate-spin" />
+        <span className="ml-2 dark:text-white">Loading services...</span>
       </div>
     );
   }
@@ -548,7 +548,7 @@ export function ServiceCatalog() {
       {/* Auth mode toggle */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold">Service Catalog</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Service Catalog</h2>
           <button
             onClick={() => {
               setIsLoading(true);
@@ -566,7 +566,7 @@ export function ServiceCatalog() {
                 duration: 3000,
               });
             }}
-            className="ml-2 text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50"
+            className="ml-2 text-blue-500 hover:text-blue-700 dark:text-white dark:hover:text-white p-1 rounded-full hover:bg-blue-50 dark:hover:bg-black"
             title="Refresh service connections"
             aria-label="Refresh service connections"
           >
@@ -576,7 +576,7 @@ export function ServiceCatalog() {
           </button>
           <button
             onClick={resetAllConnections}
-            className="ml-1 text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+            className="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-black"
             title="Reset all connections"
             aria-label="Reset all connections"
           >
@@ -588,7 +588,7 @@ export function ServiceCatalog() {
       </div>
       
       {/* Category tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <div className="flex overflow-x-auto pb-2 hide-scrollbar">
           {categories.map(category => (
             <button
@@ -596,8 +596,8 @@ export function ServiceCatalog() {
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${
                 selectedCategory === category
-                  ? "border-b-2 border-blue-500 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-white"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               {category}
@@ -655,17 +655,17 @@ export function ServiceCatalog() {
       </div>
       
       {filteredServices.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-500 dark:text-white">
           No services found in this category.
         </div>
       )}
       
-      <div className="text-center text-sm text-gray-500 pt-4">
+      <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
         <a
           href="https://mcp.composio.dev/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-700 hover:text-blue-600 inline-flex items-center"
+          className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center"
         >
           View all services on mcp.composio.dev
           <ExternalLink className="h-3 w-3 ml-1" />

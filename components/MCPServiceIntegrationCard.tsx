@@ -47,7 +47,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
       connected: "bg-green-500",
       disconnected: "bg-zinc-400 dark:bg-zinc-600",
       error: "bg-red-500",
-      connecting: "bg-blue-500",
+      connecting: "bg-blue-500 dark:bg-gray-500",
     };
 
     const statusText = {
@@ -72,8 +72,8 @@ const MCPServiceIntegrationCard = React.forwardRef<
         className="h-10 w-10 object-contain"
       />
     ) : (
-      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-        <span className="text-lg font-semibold text-blue-600">
+      <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-gray-800 flex items-center justify-center">
+        <span className="text-lg font-semibold text-blue-600 dark:text-white">
           {serviceName.charAt(0).toUpperCase()}
         </span>
       </div>
@@ -83,15 +83,15 @@ const MCPServiceIntegrationCard = React.forwardRef<
       <Card
         ref={ref}
         className={cn(
-          "w-full relative border rounded-lg border-zinc-200 dark:border-zinc-800 bg-background hover:shadow-md transition-all duration-200",
-          authLink && "border-blue-400 ring-2 ring-blue-200",
+          "w-full relative border rounded-lg border-zinc-200 dark:border-gray-800 bg-card dark:bg-black hover:shadow-md transition-all duration-200",
+          authLink && "border-blue-400 dark:border-gray-700 ring-2 ring-blue-200 dark:ring-gray-800",
           className
         )}
         {...props}
       >
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="relative h-12 w-12 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+            <div className="relative h-12 w-12 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
               {logoDisplay}
             </div>
 
@@ -99,7 +99,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-medium text-foreground">
+                    <h3 className="text-base font-medium text-foreground dark:text-white">
                       {serviceName}
                     </h3>
                     <div className="flex items-center">
@@ -109,12 +109,12 @@ const MCPServiceIntegrationCard = React.forwardRef<
                           authLink && status === "connected" ? "bg-amber-500" : statusColors[status]
                         )}
                       />
-                      <span className="ml-1.5 text-xs text-muted-foreground">
+                      <span className="ml-1.5 text-xs text-muted-foreground dark:text-gray-400">
                         {statusText[status]}
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
                     {description}
                   </p>
                 </div>
@@ -124,7 +124,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
 
           <div className="mt-4 flex items-center justify-between">
             {lastUpdated && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground dark:text-gray-400">
                 Last updated: {lastUpdated}
               </p>
             )}
@@ -137,7 +137,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
                         href={authLink} 
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs h-8 px-3 rounded transition-colors"
+                        className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 dark:bg-black dark:hover:bg-gray-800 text-white font-medium text-xs h-8 px-3 rounded transition-colors"
                       >
                         <ExternalLink className="mr-1 h-3 w-3" /> Authorize via Composio
                       </a>
@@ -145,7 +145,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-xs h-8 text-blue-600 border-blue-200"
+                        className="text-xs h-8 text-blue-600 dark:text-white border-blue-200 dark:border-gray-700"
                         onClick={() => {
                           // Open the chat
                           const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
@@ -167,7 +167,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/50"
+                        className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/50"
                         onClick={onDisconnect}
                       >
                         <Trash2 className="mr-1 h-3 w-3" /> Disconnect
@@ -179,7 +179,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/50"
+                  className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/50"
                   onClick={onConnect}
                 >
                   <AlertCircle className="mr-1 h-3 w-3" /> Retry Connection
@@ -188,7 +188,7 @@ const MCPServiceIntegrationCard = React.forwardRef<
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-8"
+                  className="text-xs h-8 dark:border-gray-700 dark:text-gray-400"
                   disabled
                 >
                   <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Connecting...
@@ -196,13 +196,13 @@ const MCPServiceIntegrationCard = React.forwardRef<
               ) : authLink ? (
                 // Display auth link prominently in the card
                 <div className="text-sm w-full mt-2">
-                  <div className="border border-blue-300 bg-blue-50 p-2 rounded-md w-full">
-                    <p className="text-sm text-gray-600 mb-2">Click to authorize:</p>
+                  <div className="border border-blue-300 dark:border-gray-700 bg-blue-50 dark:bg-gray-900 p-2 rounded-md w-full">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Click to authorize:</p>
                     <a 
                       href={authLink} 
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-sm transition-colors"
+                      className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 dark:bg-black dark:hover:bg-gray-800 text-white font-medium py-1.5 px-3 rounded text-sm transition-colors"
                     >
                       <ExternalLink className="h-3 w-3 mr-1.5" /> Authorize {serviceName}
                     </a>

@@ -32,7 +32,7 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
       <DashboardHeader
         title="Chat"
         breadcrumbs={[
@@ -45,9 +45,9 @@ export default function ChatPage() {
 
       <main className="flex-1 p-4 md:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Chat Interface</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+            <h2 className="text-xl font-semibold mb-4 dark:text-white">Chat Interface</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Chat functionality will be implemented here.
             </p>
           </div>

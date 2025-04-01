@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { CopilotActionHandler } from "./components/CopilotActionHandler";
-import { CopilotChat } from "@copilotkit/react-ui";
-import { CopilotKitCSSProperties } from "@copilotkit/react-ui";
 import { createClient } from "@/utils/supabase/client";
 import { 
   LayoutDashboard, 
@@ -22,6 +20,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ThemeToggle, useTheme } from "./components/providers";
+import { VercelV0Chat } from "@/components/ui/v0-ai-chat";
 
 // UI Components
 import { 
@@ -116,36 +116,30 @@ export default function Home() {
       active: true
     },
     {
-      label: "Settings",
-      href: "/settings",
+      label: "UIP:[TBA]",
+      href: "#",
       icon: <Settings className="h-5 w-5" />,
-      active: false
-    },
-    {
-      label: "Profile",
-      href: "/profile",
-      icon: <UserCog className="h-5 w-5" />,
       active: false
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen h-screen overflow-hidden bg-gray-50 dark:bg-black flex">
       {/* CopilotKit action handler */}
       <CopilotActionHandler />
       
       {/* Sidebar - Desktop */}
       <motion.div
         className={cn(
-          "fixed inset-y-0 left-0 z-30 bg-white border-r border-gray-200 transition-all duration-300 hidden md:flex md:flex-col",
+          "fixed inset-y-0 left-0 z-30 bg-white dark:bg-black border-r border-gray-200 dark:border-dark-DEFAULT transition-all duration-300 hidden md:flex md:flex-col",
           isSidebarOpen ? "w-64" : "w-20"
         )}
         initial={false}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-dark-DEFAULT">
           <Link href="/" className="flex items-center">
-            <div className="h-8 w-8 bg-blue-600 rounded-md flex items-center justify-center">
+            <div className="h-8 w-8 bg-blue-600 dark:bg-black rounded-md flex items-center justify-center">
               <span className="text-white font-bold">UI</span>
             </div>
             {isSidebarOpen && (
@@ -153,7 +147,7 @@ export default function Home() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="ml-3 font-semibold text-gray-900"
+                className="ml-3 font-semibold text-gray-900 dark:text-white"
               >
                 UIP Admin
               </motion.span>
@@ -161,10 +155,10 @@ export default function Home() {
           </Link>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-1.5 rounded-md hover:bg-gray-100"
+            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dark-hover"
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {isSidebarOpen ? <ChevronLeft className="h-5 w-5 text-gray-500" /> : <ChevronRight className="h-5 w-5 text-gray-500" />}
+            {isSidebarOpen ? <ChevronLeft className="h-5 w-5 text-gray-500 dark:text-dark-muted" /> : <ChevronRight className="h-5 w-5 text-gray-500 dark:text-dark-muted" />}
           </button>
         </div>
         
@@ -178,8 +172,8 @@ export default function Home() {
                 className={cn(
                   "flex items-center px-3 py-2 rounded-md transition-colors",
                   link.active
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-blue-50 dark:bg-gray-900 text-blue-700 dark:text-white"
+                    : "text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-hover"
                 )}
               >
                 <span className="flex-shrink-0">{link.icon}</span>
@@ -199,11 +193,11 @@ export default function Home() {
         </div>
         
         {/* Logout button */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 dark:border-dark-DEFAULT p-4">
           <button
             onClick={handleLogout}
             className={cn(
-              "flex items-center px-3 py-2 w-full rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+              "flex items-center px-3 py-2 w-full rounded-md transition-colors text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-hover"
             )}
           >
             <LogOut className="flex-shrink-0 h-5 w-5" />
@@ -232,25 +226,25 @@ export default function Home() {
       {/* Mobile sidebar */}
       <motion.div
         className={cn(
-          "fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 md:hidden transform transition-transform duration-300",
+          "fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-dark-DEFAULT md:hidden transform transition-transform duration-300",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
         initial={false}
       >
         {/* Mobile sidebar content */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-dark-DEFAULT">
           <Link href="/" className="flex items-center">
-            <div className="h-8 w-8 bg-blue-600 rounded-md flex items-center justify-center">
+            <div className="h-8 w-8 bg-blue-600 dark:bg-black rounded-md flex items-center justify-center">
               <span className="text-white font-bold">UI</span>
             </div>
-            <span className="ml-3 font-semibold text-gray-900">UIP Admin</span>
+            <span className="ml-3 font-semibold text-gray-900 dark:text-white">UIP Admin</span>
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-1.5 rounded-md hover:bg-gray-100"
+            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dark-hover"
             aria-label="Close mobile menu"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
+            <ChevronLeft className="h-5 w-5 text-gray-500 dark:text-dark-muted" />
           </button>
         </div>
         
@@ -264,8 +258,8 @@ export default function Home() {
                 className={cn(
                   "flex items-center px-3 py-2 rounded-md transition-colors",
                   link.active
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-blue-50 dark:bg-gray-900 text-blue-700 dark:text-white"
+                    : "text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-hover"
                 )}
               >
                 <span className="flex-shrink-0">{link.icon}</span>
@@ -276,10 +270,10 @@ export default function Home() {
         </div>
         
         {/* Mobile logout button */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 dark:border-dark-DEFAULT p-4">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full px-3 py-2 rounded-md transition-colors text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-hover"
           >
             <LogOut className="flex-shrink-0 h-5 w-5" />
             <span className="ml-3 font-medium">Logout</span>
@@ -290,20 +284,20 @@ export default function Home() {
       {/* Main layout - full width single panel that toggles between integrations and chat */}
       <div 
         className={cn(
-          "flex-1 flex flex-col transition-all duration-300",
+          "flex-1 flex flex-col transition-all duration-300 overflow-hidden",
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
         )}
       >
         {/* Header */}
-        <header className="z-30 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 sticky top-0">
+        <header className="z-30 h-14 bg-white dark:bg-black border-b border-gray-200 dark:border-dark-DEFAULT flex items-center justify-between px-4 md:px-6 sticky top-0">
           {/* Left section with mobile menu toggle */}
           <div className="flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-1.5 rounded-md hover:bg-gray-100 md:hidden mr-2"
+              className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dark-hover md:hidden mr-2"
               aria-label="Open mobile menu"
             >
-              <Menu className="h-5 w-5 text-gray-500" />
+              <Menu className="h-5 w-5 text-gray-500 dark:text-dark-muted" />
             </button>
             
             {/* Add Chat button at the beginning of connected services */}
@@ -311,7 +305,11 @@ export default function Home() {
               variant={isIntegrationsOpen ? "default" : "outline"}
               onClick={toggleMainPanel}
               size="sm"
-              className="mr-3 gap-2 hidden md:flex"
+              className={`mr-3 gap-2 hidden md:flex ${
+                isIntegrationsOpen 
+                  ? "bg-primary dark:bg-gray-300 dark:text-black" 
+                  : "dark:border-gray-500 dark:text-white hover:dark:bg-gray-800"
+              }`}
             >
               {isIntegrationsOpen ? (
                 <>
@@ -335,24 +333,27 @@ export default function Home() {
             />
           </div>
           
-          {/* Right section with search, notifications, and profile */}
+          {/* Right section with search, notifications, profile, and theme toggle */}
           <div className="flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Search */}
             <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-dark-muted" />
               <Input
                 type="search"
                 placeholder="Search..."
-                className="w-[200px] pl-9 pr-4 py-2 rounded-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                className="w-[200px] pl-9 pr-4 py-2 rounded-full border-gray-300 dark:border-dark-DEFAULT dark:bg-black dark:text-white focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             
             {/* Notifications */}
             <button 
-              className="p-1.5 rounded-full hover:bg-gray-100 relative"
+              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-dark-hover relative"
               aria-label="View notifications"
             >
-              <Bell className="h-5 w-5 text-gray-600" />
+              <Bell className="h-5 w-5 text-gray-600 dark:text-dark-muted" />
               <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
             </button>
             
@@ -360,11 +361,11 @@ export default function Home() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button 
-                  className="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100"
+                  className="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-dark-hover"
                   aria-label="User menu"
                 >
                   {isUserLoading ? (
-                    <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-dark-accent animate-pulse"></div>
                   ) : user.avatar ? (
                     <img
                       src={user.avatar}
@@ -372,34 +373,34 @@ export default function Home() {
                       className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User className="h-4 w-4 text-blue-600" />
+                    <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-gray-800 flex items-center justify-center">
+                      <User className="h-4 w-4 text-blue-600 dark:text-white" />
                     </div>
                   )}
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-sm font-medium text-gray-700 dark:text-white">
                       {isUserLoading ? "Loading..." : user.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-dark-muted">
                       {isUserLoading ? "..." : user.email}
                     </p>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-gray-500 hidden md:block" />
+                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-dark-muted hidden md:block" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56 dark:bg-black dark:border-dark-DEFAULT">
+                <DropdownMenuLabel className="dark:text-white">My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="dark:bg-dark-DEFAULT" />
+                <DropdownMenuItem className="dark:text-dark-muted dark:focus:bg-dark-hover dark:focus:text-white">
                   <UserCog className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem className="dark:text-dark-muted dark:focus:bg-dark-hover dark:focus:text-white">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuSeparator className="dark:bg-dark-DEFAULT" />
+                <DropdownMenuItem onClick={handleLogout} className="dark:text-dark-muted dark:focus:bg-dark-hover dark:focus:text-white">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -409,7 +410,7 @@ export default function Home() {
         </header>
         
         {/* Main content - single panel that toggles between integrations and chat */}
-        <div className="flex-1 h-[calc(100vh-4rem)] overflow-auto">
+        <div className="flex-1 h-[calc(100vh-4rem)] overflow-hidden">
           {/* Integrations panel */}
           <div 
             className={cn(
@@ -418,56 +419,55 @@ export default function Home() {
             )}
           >
             {/* Connected services summary and integrations content */}
-            <div className="bg-white p-4 md:p-6 flex items-center justify-between">
+            <div className="bg-white dark:bg-black p-4 md:p-6 flex items-center justify-between">
               <div>
-                <h1 className="text-xl font-bold">Service Integrations</h1>
-                <p className="text-sm text-gray-500">Connect your assistant to external services</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Service Integrations</h1>
+                <p className="text-sm text-gray-500 dark:text-dark-muted">Connect your assistant to external services</p>
               </div>
             </div>
             
             <IntegrationDashboard />
           </div>
           
-          {/* Chat panel */}
+          {/* Enhanced Chat panel with animations */}
           <div 
             className={cn(
-              "h-full bg-white transition-all duration-300",
-              !isIntegrationsOpen ? "block" : "hidden"
+              "h-full bg-white dark:bg-black transition-all duration-300 flex flex-col",
+              !isIntegrationsOpen ? "flex" : "hidden"
             )}
-            style={
-              {
-                "--copilot-kit-primary-color": "#4F4F4F",
-              } as CopilotKitCSSProperties
-            }
           >
-            <div className="bg-white p-4 md:p-6 flex items-center justify-between border-b">
+            <div className="bg-white dark:bg-black p-4 md:p-6 flex items-center justify-between border-b border-gray-200 dark:border-dark-DEFAULT flex-shrink-0">
               <div>
-                <h1 className="text-xl font-bold">MCP Assistant</h1>
-                <p className="text-sm text-gray-500">Ask questions about your integrations</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Integrations Chat</h1>
+                <p className="text-sm text-gray-500 dark:text-dark-muted">Use your tools to get the job done</p>
               </div>
+              
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="hidden md:block"
+              >
+                <div className="px-3 py-1.5 bg-blue-50 dark:bg-gray-900 text-blue-700 dark:text-white text-xs rounded-full">
+                  <span className="animate-pulse-subtle mr-1.5 inline-block h-2 w-2 rounded-full bg-blue-600 dark:bg-white"></span>
+                  Ready to assist you
+                </div>
+              </motion.div>
             </div>
             
-            <div className="h-[calc(100vh-8rem)]">
-              <CopilotChat
-                className="h-full flex flex-col"
-                instructions={
-                  "You are assisting the user as best as you can with their Multi-Channel Platform (MCP) integration needs. Answer in the best way possible given the data you have."
-                }
-                labels={{
-                  title: "MCP Assistant",
-                  initial: "Need any help with your integrations?",
-                  error: "The agent server is currently unavailable. Please run the start_agent.bat script in the agent folder to start the server.",
-                }}
-              />
+            <div className="flex-1 overflow-hidden">
+              <VercelV0Chat />
             </div>
           </div>
         </div>
       </div>
       
       {/* Mobile toggle button */}
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={toggleMainPanel}
-        className="fixed bottom-4 right-4 z-30 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 md:hidden"
+        className="fixed bottom-4 right-4 z-30 p-3 bg-blue-600 dark:bg-black text-white rounded-full shadow-lg hover:bg-blue-700 dark:hover:bg-gray-900 md:hidden"
         aria-label={isIntegrationsOpen ? "Open chat" : "Show integrations"}
       >
         {isIntegrationsOpen ? (
@@ -475,7 +475,7 @@ export default function Home() {
         ) : (
           <PanelRightOpen className="h-6 w-6" />
         )}
-      </button>
+      </motion.button>
     </div>
   );
 }

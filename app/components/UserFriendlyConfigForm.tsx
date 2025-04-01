@@ -193,8 +193,8 @@ export function UserFriendlyConfigForm() {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="flex flex-col items-center">
-          <RefreshCw className="h-8 w-8 text-blue-500 animate-spin mb-2" />
-          <p>Loading your connections...</p>
+          <RefreshCw className="h-8 w-8 text-blue-500 dark:text-white animate-spin mb-2" />
+          <p className="dark:text-dark-muted">Loading your connections...</p>
         </div>
       </div>
     );
@@ -205,8 +205,8 @@ export function UserFriendlyConfigForm() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Your Connected Services</h1>
-          <p className="text-muted-foreground">Manage the tools and services connected to your assistant</p>
+          <h1 className="text-2xl font-bold tracking-tight dark:text-white">Your Connected Services</h1>
+          <p className="text-muted-foreground dark:text-dark-muted">Manage the tools and services connected to your assistant</p>
         </div>
         <Button onClick={() => setShowAddServiceForm(true)} className="h-10 px-4 py-2">
           <Plus className="h-4 w-4 mr-2" />
@@ -216,47 +216,47 @@ export function UserFriendlyConfigForm() {
 
       {/* Connection Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Card>
+        <Card className="dark:bg-black dark:border-dark-DEFAULT">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Services</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-white">Total Services</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalConnections}</div>
-            <p className="text-sm text-muted-foreground">Connected to your assistant</p>
+            <div className="text-3xl font-bold dark:text-white">{totalConnections}</div>
+            <p className="text-sm text-muted-foreground dark:text-dark-muted">Connected to your assistant</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-black dark:border-dark-DEFAULT">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Command Line Tools</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-white">Command Line Tools</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{commandLineTools}</div>
-            <p className="text-sm text-muted-foreground">Local applications</p>
+            <div className="text-3xl font-bold dark:text-white">{commandLineTools}</div>
+            <p className="text-sm text-muted-foreground dark:text-dark-muted">Local applications</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-black dark:border-dark-DEFAULT">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Web Services</CardTitle>
+            <CardTitle className="text-sm font-medium dark:text-white">Web Services</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{webServices}</div>
-            <p className="text-sm text-muted-foreground">Cloud-based connections</p>
+            <div className="text-3xl font-bold dark:text-white">{webServices}</div>
+            <p className="text-sm text-muted-foreground dark:text-dark-muted">Cloud-based connections</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Connected Services List */}
-      <Card>
+      <Card className="dark:bg-black dark:border-dark-DEFAULT">
         <CardHeader>
-          <CardTitle>Your Services</CardTitle>
-          <CardDescription>Tools and applications connected to your virtual assistant</CardDescription>
+          <CardTitle className="dark:text-white">Your Services</CardTitle>
+          <CardDescription className="dark:text-dark-muted">Tools and applications connected to your virtual assistant</CardDescription>
         </CardHeader>
         <CardContent>
           {totalConnections === 0 ? (
             <div className="text-center py-8">
-              <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <h3 className="text-lg font-medium mb-2">No services connected yet</h3>
-              <p className="text-muted-foreground mb-4">
+              <MessageSquare className="h-12 w-12 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
+              <h3 className="text-lg font-medium mb-2 dark:text-white">No services connected yet</h3>
+              <p className="text-muted-foreground dark:text-dark-muted mb-4">
                 Connect your first service to start interacting with it through your assistant
               </p>
               <Button onClick={() => setShowAddServiceForm(true)}>
@@ -267,29 +267,29 @@ export function UserFriendlyConfigForm() {
           ) : (
             <div className="grid gap-4">
               {Object.entries(configs).map(([name, config]) => (
-                <div key={name} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={name} className="flex items-center justify-between p-4 border dark:border-dark-DEFAULT rounded-lg dark:bg-black">
                   <div className="flex items-center gap-3">
                     {config.transport === "stdio" ? (
-                      <div className="p-2 bg-blue-100 rounded-full">
-                        <Settings className="h-5 w-5 text-blue-600" />
+                      <div className="p-2 bg-blue-100 dark:bg-gray-800 rounded-full">
+                        <Settings className="h-5 w-5 text-blue-600 dark:text-white" />
                       </div>
                     ) : (
-                      <div className="p-2 bg-green-100 rounded-full">
-                        <Database className="h-5 w-5 text-green-600" />
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                        <Database className="h-5 w-5 text-green-600 dark:text-green-400" />
                       </div>
                     )}
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{name}</h3>
-                        <Badge variant={config.transport === "stdio" ? "secondary" : "default"}>
+                        <h3 className="font-medium dark:text-white">{name}</h3>
+                        <Badge variant={config.transport === "stdio" ? "secondary" : "default"} className="dark:bg-gray-800 dark:text-gray-200">
                           {config.transport === "stdio" ? "Command Line" : "Web Service"}
                         </Badge>
-                        <Badge variant="outline" className="border-green-200 text-green-800 bg-green-50">
+                        <Badge variant="outline" className="border-green-200 dark:border-green-900 text-green-800 dark:text-green-400 bg-green-50 dark:bg-green-900/20">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Connected
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 dark:text-dark-muted">
                         {config.transport === "stdio" 
                           ? `Command: ${config.command} ${config.args.join(" ")}` 
                           : `URL: ${config.url}`}
@@ -302,7 +302,7 @@ export function UserFriendlyConfigForm() {
                     onClick={() => removeConnection(name)}
                     aria-label={`Remove ${name}`}
                   >
-                    <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500" />
+                    <Trash2 className="h-4 w-4 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400" />
                   </Button>
                 </div>
               ))}
@@ -314,9 +314,9 @@ export function UserFriendlyConfigForm() {
       {/* Add Service Modal */}
       {showAddServiceForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-black dark:border dark:border-dark-DEFAULT rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
+              <h2 className="text-lg font-semibold flex items-center dark:text-white">
                 <Plus className="w-5 h-5 mr-2" />
                 Connect a New Service
               </h2>
@@ -332,48 +332,48 @@ export function UserFriendlyConfigForm() {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="serviceName">Service Name</Label>
+                <Label htmlFor="serviceName" className="dark:text-white">Service Name</Label>
                 <Input
                   id="serviceName"
                   type="text"
                   value={serverName}
                   onChange={(e) => setServerName(e.target.value)}
-                  className="w-full"
+                  className="w-full dark:bg-black dark:border-dark-DEFAULT dark:text-white"
                   placeholder="e.g., Email Service, Google Drive, Slack"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">
                   Give your service a recognizable name
                 </p>
               </div>
 
               <div>
-                <Label>Connection Type</Label>
+                <Label className="dark:text-white">Connection Type</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   <button
                     type="button"
                     onClick={() => setConnectionType("stdio")}
-                    className={`px-4 py-3 border rounded-md text-center flex flex-col items-center justify-center gap-2 ${
+                    className={`px-4 py-3 border rounded-md text-center flex flex-col items-center justify-center gap-2 dark:border-dark-DEFAULT ${
                       connectionType === "stdio"
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
+                        ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                        : "bg-white dark:bg-black text-gray-700 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-hover"
                     }`}
                   >
                     <Settings className="w-5 h-5" />
                     <span className="text-sm font-medium">Command Line</span>
-                    <span className="text-xs text-gray-500">Local applications</span>
+                    <span className="text-xs text-gray-500 dark:text-dark-muted">Local applications</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setConnectionType("sse")}
-                    className={`px-4 py-3 border rounded-md text-center flex flex-col items-center justify-center gap-2 ${
+                    className={`px-4 py-3 border rounded-md text-center flex flex-col items-center justify-center gap-2 dark:border-dark-DEFAULT ${
                       connectionType === "sse"
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
+                        ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                        : "bg-white dark:bg-black text-gray-700 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-hover"
                     }`}
                   >
                     <Database className="w-5 h-5" />
                     <span className="text-sm font-medium">Web Service</span>
-                    <span className="text-xs text-gray-500">Cloud APIs</span>
+                    <span className="text-xs text-gray-500 dark:text-dark-muted">Cloud APIs</span>
                   </button>
                 </div>
               </div>
@@ -381,46 +381,46 @@ export function UserFriendlyConfigForm() {
               {connectionType === "stdio" ? (
                 <>
                   <div>
-                    <Label htmlFor="command">Command</Label>
+                    <Label htmlFor="command" className="dark:text-white">Command</Label>
                     <Input
                       id="command"
                       type="text"
                       value={command}
                       onChange={(e) => setCommand(e.target.value)}
-                      className="w-full"
+                      className="w-full dark:bg-black dark:border-dark-DEFAULT dark:text-white"
                       placeholder="e.g., python, node"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">
                       The program to execute (e.g., python, node)
                     </p>
                   </div>
                   <div>
-                    <Label htmlFor="arguments">Arguments</Label>
+                    <Label htmlFor="arguments" className="dark:text-white">Arguments</Label>
                     <Input
                       id="arguments"
                       type="text"
                       value={args}
                       onChange={(e) => setArgs(e.target.value)}
-                      className="w-full"
+                      className="w-full dark:bg-black dark:border-dark-DEFAULT dark:text-white"
                       placeholder="e.g., script.py --flag value"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">
                       Any arguments to pass to the command
                     </p>
                   </div>
                 </>
               ) : (
                 <div>
-                  <Label htmlFor="url">Service URL</Label>
+                  <Label htmlFor="url" className="dark:text-white">Service URL</Label>
                   <Input
                     id="url"
                     type="text"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    className="w-full"
+                    className="w-full dark:bg-black dark:border-dark-DEFAULT dark:text-white"
                     placeholder="e.g., https://api.example.com/events"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">
                     The URL endpoint of the web service
                   </p>
                 </div>
@@ -430,6 +430,7 @@ export function UserFriendlyConfigForm() {
                 <Button
                   variant="outline"
                   onClick={() => setShowAddServiceForm(false)}
+                  className="dark:border-dark-DEFAULT dark:text-dark-muted dark:hover:bg-dark-hover"
                 >
                   Cancel
                 </Button>

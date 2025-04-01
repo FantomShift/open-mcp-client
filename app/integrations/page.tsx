@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardHeader } from "@/app/components/DashboardHeader";
+import { IntegrationDashboard } from "@/app/components/IntegrationDashboard";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -32,9 +33,9 @@ export default function IntegrationsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
       <DashboardHeader
-        title="Integrations"
+        title="Service Integrations"
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Integrations", href: "/integrations" }
@@ -44,13 +45,13 @@ export default function IntegrationsPage() {
       />
 
       <main className="flex-1 p-4 md:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Integrations</h2>
-            <p className="text-gray-600 mb-6">
-              Manage your external service integrations here.
-            </p>
-          </div>
+        <div className="w-full">
+          <h2 className="text-xl font-semibold mb-2 dark:text-white">Connect your assistant to external services</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Manage connections between Adam and third-party services.
+          </p>
+          
+          <IntegrationDashboard />
         </div>
       </main>
     </div>

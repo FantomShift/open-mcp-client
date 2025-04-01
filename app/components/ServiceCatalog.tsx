@@ -28,6 +28,13 @@ export function ServiceCatalog() {
   const [authLinks, setAuthLinks] = useState<Record<string, string>>({});
   const { addToast } = useToast();
 
+  // Define a function to dispatch custom events for connection changes
+  const notifyConnectionChanged = () => {
+    console.log("Dispatching service-connection-changed event");
+    const event = new Event('service-connection-changed');
+    window.dispatchEvent(event);
+  };
+
   // Get all available categories
   const categories = ["Popular", ...Array.from(new Set(services.map(s => s.category)))];
   
@@ -335,6 +342,9 @@ export function ServiceCatalog() {
       console.log('Updating connected services to:', updatedConnectedServices);
       setConnectedServices(updatedConnectedServices);
       
+      // Notify other components that connections have changed
+      notifyConnectionChanged();
+      
       // Update service URL (MCP server URL) if applicable 
       if (data.redirectUrl) {
         setServiceUrls(prev => ({
@@ -343,12 +353,12 @@ export function ServiceCatalog() {
         }));
       }
       
-      // Show success message
+      // Show success message with improved description that includes authorization info
       addToast({
         title: "Service Connected",
-        description: `Successfully connected to ${serviceId}. Please authorize access below.`,
+        description: `Successfully connected to ${serviceId}. ${authorizationUrl ? "Click the 'Authorize via Composio' button to complete setup." : ""}`,
         variant: "success",
-        duration: 5000,
+        duration: 8000,
       });
       
       // Handle the authorization URL from Composio for OAuth
@@ -364,14 +374,8 @@ export function ServiceCatalog() {
           console.log("Updated auth links:", newLinks);
           return newLinks;
         });
-        
-        addToast({
-          title: "Authorization Link Ready",
-          description: `Click the "Authorize via Composio" button to complete setup for ${serviceId}.`,
-          variant: "success",
-          duration: 15000, // Show longer
-        });
-      } else {
+      }
+      else {
         // No authorization URL was provided - inform the user to use the chat
         addToast({
           title: "Authorization Required",
@@ -462,6 +466,9 @@ export function ServiceCatalog() {
         variant: "success",
         duration: 3000,
       });
+      
+      // Notify other components that connections have changed
+      notifyConnectionChanged();
     } catch (error) {
       console.error("Error resetting connections:", error);
       addToast({
@@ -497,6 +504,9 @@ export function ServiceCatalog() {
       
       // First update the UI state
       setConnectedServices(prev => prev.filter(id => id !== normalizedServiceId));
+      
+      // Notify other components that connections have changed
+      notifyConnectionChanged();
       
       // Remove from service URLs
       setServiceUrls(prev => {
@@ -607,7 +617,7 @@ export function ServiceCatalog() {
       </div>
 
       {/* Services grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredServices.map(service => {
           // Normalize the service ID for comparison with our connected services list
           const normalizedServiceId = normalizeServiceId(service.id);
@@ -615,8 +625,6 @@ export function ServiceCatalog() {
           const isConnecting = connectionInProgress === service.id;
           const authLink = authLinks[normalizedServiceId];
           const serverUrl = serviceUrls[normalizedServiceId];
-          
-          console.log(`Service: ${service.name}, ID: ${service.id}, Normalized: ${normalizedServiceId}, Connected: ${isConnected}`);
           
           return (
             <MCPServiceIntegrationCard

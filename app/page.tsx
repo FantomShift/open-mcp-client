@@ -21,7 +21,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThemeToggle, useTheme } from "./components/providers";
-import { VercelV0Chat } from "@/components/ui/v0-ai-chat";
+import { ChatWrapper } from "./components/ChatWrapper";
+import { CopilotKitCSSProperties } from "@copilotkit/react-ui";
 
 // UI Components
 import { 
@@ -95,6 +96,20 @@ export default function Home() {
     };
     
     fetchUserData();
+    
+    // Listen for the custom event when a service is connected or disconnected
+    const handleServiceConnectionChange = () => {
+      console.log("Detected service connection change, refreshing connected services...");
+      fetchUserData();
+    };
+    
+    // Add event listener for service connection changes
+    window.addEventListener('service-connection-changed', handleServiceConnectionChange);
+    
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener('service-connection-changed', handleServiceConnectionChange);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -411,53 +426,23 @@ export default function Home() {
         
         {/* Main content - single panel that toggles between integrations and chat */}
         <div className="flex-1 h-[calc(100vh-4rem)] overflow-hidden">
-          {/* Integrations panel */}
-          <div 
-            className={cn(
-              "h-full transition-all duration-300 overflow-auto",
-              isIntegrationsOpen ? "block" : "hidden"
-            )}
-          >
-            {/* Connected services summary and integrations content */}
-            <div className="bg-white dark:bg-black p-4 md:p-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Service Integrations</h1>
-                <p className="text-sm text-gray-500 dark:text-dark-muted">Connect your assistant to external services</p>
-              </div>
-            </div>
-            
-            <IntegrationDashboard />
-          </div>
-          
-          {/* Enhanced Chat panel with animations */}
-          <div 
-            className={cn(
-              "h-full bg-white dark:bg-black transition-all duration-300 flex flex-col",
-              !isIntegrationsOpen ? "flex" : "hidden"
-            )}
-          >
-            <div className="bg-white dark:bg-black p-4 md:p-6 flex items-center justify-between border-b border-gray-200 dark:border-dark-DEFAULT flex-shrink-0">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Integrations Chat</h1>
-                <p className="text-sm text-gray-500 dark:text-dark-muted">Use your tools to get the job done</p>
-              </div>
-              
-              <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="hidden md:block"
-              >
-                <div className="px-3 py-1.5 bg-blue-50 dark:bg-gray-900 text-blue-700 dark:text-white text-xs rounded-full">
-                  <span className="animate-pulse-subtle mr-1.5 inline-block h-2 w-2 rounded-full bg-blue-600 dark:bg-white"></span>
-                  Ready to assist you
+          {/* Main content area */}
+          <div className="flex-1 p-4 md:p-8 overflow-y-auto h-full">
+            {isIntegrationsOpen ? (
+              <IntegrationDashboard />
+            ) : (
+              <div className="h-full flex flex-col">
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <ChatWrapper 
+                    instructions="You are assisting the user as best as you can. Answer in the best way possible given the data you have."
+                    labels={{
+                      title: "Integrations Chat",
+                      initial: "Need any help?",
+                    }}
+                  />
                 </div>
-              </motion.div>
-            </div>
-            
-            <div className="flex-1 overflow-hidden">
-              <VercelV0Chat />
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

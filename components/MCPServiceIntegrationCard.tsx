@@ -83,141 +83,116 @@ const MCPServiceIntegrationCard = React.forwardRef<
       <Card
         ref={ref}
         className={cn(
-          "w-full relative border rounded-lg border-zinc-200 dark:border-gray-800 bg-card dark:bg-black hover:shadow-md transition-all duration-200",
+          "w-full h-[200px] relative border rounded-lg border-zinc-200 dark:border-gray-800 bg-card dark:bg-black hover:shadow-md transition-all duration-200",
           authLink && "border-blue-400 dark:border-gray-700 ring-2 ring-blue-200 dark:ring-gray-800",
           className
         )}
         {...props}
       >
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-6 flex flex-col h-full">
+          {/* Card top section - logo and info */}
+          <div className="flex items-start gap-4 flex-shrink-0">
             <div className="relative h-12 w-12 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
               {logoDisplay}
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-medium text-foreground dark:text-white">
-                      {serviceName}
-                    </h3>
-                    <div className="flex items-center">
-                      <span
-                        className={cn(
-                          "h-2 w-2 rounded-full",
-                          authLink && status === "connected" ? "bg-amber-500" : statusColors[status]
-                        )}
-                      />
-                      <span className="ml-1.5 text-xs text-muted-foreground dark:text-gray-400">
-                        {statusText[status]}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
-                    {description}
-                  </p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-medium text-foreground dark:text-white line-clamp-1">
+                  {serviceName}
+                </h3>
+                <div className="flex items-center flex-shrink-0">
+                  <span
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      authLink && status === "connected" ? "bg-amber-500" : statusColors[status]
+                    )}
+                  />
+                  <span className="ml-1.5 text-xs text-muted-foreground dark:text-gray-400 whitespace-nowrap">
+                    {statusText[status]}
+                  </span>
                 </div>
               </div>
+              <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1 line-clamp-2">
+                {description}
+              </p>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between">
-            {lastUpdated && (
-              <p className="text-xs text-muted-foreground dark:text-gray-400">
-                Last updated: {lastUpdated}
-              </p>
+          {/* Card bottom section - actions */}
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-2">
+            {status === "connected" ? (
+              <>
+                {authLink && (
+                  <a 
+                    href={authLink} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 dark:bg-black dark:hover:bg-gray-800 text-white font-medium text-xs h-8 px-3 rounded transition-colors"
+                  >
+                    <ExternalLink className="mr-1 h-3 w-3" /> Authorize via Composio
+                  </a>
+                )}
+                {!authLink && status === "connected" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8 text-blue-600 dark:text-white border-blue-200 dark:border-gray-700"
+                    onClick={() => {
+                      // Open the chat
+                      const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
+                      if (chatButton) chatButton.click();
+                      
+                      // Add message to inform user
+                      addToast({
+                        title: "Use Chat Assistant",
+                        description: `Type "I need to authorize ${serviceName}" in the chat to get authorization help.`,
+                        variant: "info",
+                        duration: 8000,
+                      });
+                    }}
+                  >
+                    Use MCP Chat
+                  </Button>
+                )}
+                {onDisconnect && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/50"
+                    onClick={onDisconnect}
+                  >
+                    <Trash2 className="mr-1 h-3 w-3" /> Disconnect
+                  </Button>
+                )}
+              </>
+            ) : status === "error" ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/50"
+                onClick={onConnect}
+              >
+                <AlertCircle className="mr-1 h-3 w-3" /> Retry Connection
+              </Button>
+            ) : status === "connecting" ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 dark:border-gray-700 dark:text-gray-400"
+                disabled
+              >
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Connecting...
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="text-xs h-8"
+                onClick={onConnect}
+              >
+                <ExternalLink className="mr-1 h-3 w-3" /> Connect
+              </Button>
             )}
-            <div className="flex items-center gap-2 ml-auto">
-              {status === "connected" ? (
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center gap-2">
-                    {authLink ? (
-                      <a 
-                        href={authLink} 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 dark:bg-black dark:hover:bg-gray-800 text-white font-medium text-xs h-8 px-3 rounded transition-colors"
-                      >
-                        <ExternalLink className="mr-1 h-3 w-3" /> Authorize via Composio
-                      </a>
-                    ) : status === "connected" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-8 text-blue-600 dark:text-white border-blue-200 dark:border-gray-700"
-                        onClick={() => {
-                          // Open the chat
-                          const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
-                          if (chatButton) chatButton.click();
-                          
-                          // Add message to inform user
-                          addToast({
-                            title: "Use Chat Assistant",
-                            description: `Type "I need to authorize ${serviceName}" in the chat to get authorization help.`,
-                            variant: "info",
-                            duration: 8000,
-                          });
-                        }}
-                      >
-                        Use MCP Chat
-                      </Button>
-                    )}
-                    {onDisconnect && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/50"
-                        onClick={onDisconnect}
-                      >
-                        <Trash2 className="mr-1 h-3 w-3" /> Disconnect
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ) : status === "error" ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-8 text-red-500 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/50"
-                  onClick={onConnect}
-                >
-                  <AlertCircle className="mr-1 h-3 w-3" /> Retry Connection
-                </Button>
-              ) : status === "connecting" ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-8 dark:border-gray-700 dark:text-gray-400"
-                  disabled
-                >
-                  <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Connecting...
-                </Button>
-              ) : authLink ? (
-                // Display auth link prominently in the card
-                <div className="text-sm w-full mt-2">
-                  <div className="border border-blue-300 dark:border-gray-700 bg-blue-50 dark:bg-gray-900 p-2 rounded-md w-full">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Click to authorize:</p>
-                    <a 
-                      href={authLink} 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 dark:bg-black dark:hover:bg-gray-800 text-white font-medium py-1.5 px-3 rounded text-sm transition-colors"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1.5" /> Authorize {serviceName}
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  className="text-xs h-8"
-                  onClick={onConnect}
-                >
-                  <ExternalLink className="mr-1 h-3 w-3" /> Connect
-                </Button>
-              )}
-            </div>
           </div>
         </CardContent>
       </Card>

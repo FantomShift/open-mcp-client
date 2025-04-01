@@ -16,16 +16,36 @@ import {
     CheckSquare,
     Loader2
 } from "lucide-react";
+import { ToolCallRenderer } from "@/app/components/ToolCallRenderer";
 
 interface UseAutoResizeTextareaProps {
     minHeight: number;
     maxHeight?: number;
 }
 
-// Define message types
+// Define message and tool call types properly
+interface ToolCall {
+    name: string;
+    args: Record<string, any>;
+    status: string;
+    result: any;
+}
+
+interface AgentMessage {
+    role: 'user' | 'assistant';
+    content: string;
+    toolCalls?: ToolCall[];
+}
+
 interface Message {
     role: 'user' | 'assistant';
     content: string;
+    toolCalls?: {
+        name: string;
+        args: any;
+        status: string;
+        result?: any;
+    }[];
 }
 
 function useAutoResizeTextarea({
@@ -79,6 +99,22 @@ function useAutoResizeTextarea({
     return { textareaRef, adjustHeight };
 }
 
+// Create a type that represents the agent as we're using it
+type AgentType = {
+    sendMessage?: (message: string) => Promise<any>;
+    submitMessage?: (message: string) => Promise<any>;
+    getResponse?: (message: string) => Promise<any>;
+    messages?: any[];
+    isLoading?: boolean;
+    running?: boolean;
+};
+
+interface CopilotKitConfig {
+    name: string;
+    apiUrl?: string;
+    baseUrl?: string;
+}
+
 export function VercelV0Chat() {
     const [value, setValue] = useState("");
     const [localMessages, setLocalMessages] = useState<Message[]>([
@@ -90,37 +126,86 @@ export function VercelV0Chat() {
         maxHeight: 200,
     });
 
-    // Use CopilotKit's agent hook
-    const agent = useCoAgent({
-        name: "sample_agent",
-        initialMessages: [
-            {
-                role: "assistant",
-                content: "Hi! I'm ready for instructions."
-            }
-        ]
-    });
-
-    // Get agent methods and state
-    const sendMessage = agent.sendMessage || agent.submitMessage || agent.getResponse;
-    const agentMessages = agent.messages || [];
-    const isLoading = agent.isLoading || false;
+    // Use direct communication instead
+    const [isLoading, setIsLoading] = useState(false);
+    const [agentMessages, setAgentMessages] = useState<any[]>([]);
     
-    // Log agent object for debugging
-    useEffect(() => {
-        console.log("Agent object:", agent);
-    }, [agent]);
-
-    // Synchronize CopilotKit messages with our UI
-    useEffect(() => {
-        if (agentMessages && agentMessages.length > 0) {
-            const formattedMessages = agentMessages.map(message => ({
-                role: message.role as 'user' | 'assistant',
-                content: message.content
-            }));
-            setLocalMessages(formattedMessages);
+    // Function to directly send a message to the agent server
+    const sendMessageToAgent = async (message: string) => {
+        setIsLoading(true);
+        try {
+            const response = await fetch('http://localhost:8123/assistants/sample_agent/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                }),
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Agent server responded with ${response.status}`);
+            }
+            
+            const reader = response.body?.getReader();
+            if (!reader) {
+                throw new Error('Response body is null');
+            }
+            
+            // Start reading the stream
+            let receivedMessage = "";
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                // Decode the received value
+                const chunk = new TextDecoder().decode(value);
+                console.log("Received chunk:", chunk);
+                
+                try {
+                    // The response might contain multiple JSON objects
+                    const lines = chunk.split('\n').filter(line => line.trim());
+                    for (const line of lines) {
+                        try {
+                            const data = JSON.parse(line);
+                            if (data.type === 'message' && data.data?.content) {
+                                receivedMessage += data.data.content;
+                            }
+                        } catch (e) {
+                            console.warn("Error parsing JSON in line:", line, e);
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Error processing chunk:", e);
+                }
+            }
+            
+            // Add the received message to local state
+            if (receivedMessage) {
+                setLocalMessages(prev => [...prev, { role: 'assistant', content: receivedMessage }]);
+            } else {
+                setLocalMessages(prev => [...prev, { 
+                    role: 'assistant', 
+                    content: "I received your message but couldn't generate a proper response." 
+                }]);
+            }
+            
+        } catch (error) {
+            console.error("Error communicating with agent server:", error);
+            setLocalMessages(prev => [...prev, { 
+                role: 'assistant', 
+                content: "Sorry, there was an error communicating with the agent server: " + (error instanceof Error ? error.message : String(error))
+            }]);
+        } finally {
+            setIsLoading(false);
         }
-    }, [agentMessages]);
+    };
+
+    // Scroll to bottom when messages change
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [localMessages]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -130,7 +215,7 @@ export function VercelV0Chat() {
     };
 
     const handleSendMessage = async () => {
-        if (value.trim() && !isLoading && sendMessage) {
+        if (value.trim() && !isLoading) {
             // Get trimmed message
             const messageText = value.trim();
             
@@ -141,24 +226,10 @@ export function VercelV0Chat() {
             // Add user message to local state immediately for better UX
             setLocalMessages(prev => [...prev, { role: 'user', content: messageText }]);
             
-            try {
-                // Submit to CopilotKit
-                await sendMessage(messageText);
-            } catch (error) {
-                console.error("Error sending message:", error);
-                // Add error message
-                setLocalMessages(prev => [...prev, { 
-                    role: 'assistant', 
-                    content: "Sorry, there was an error communicating with the agent server. Make sure it's running at http://localhost:8123."
-                }]);
-            }
+            // Send the message to the agent server
+            await sendMessageToAgent(messageText);
         }
     };
-
-    // Scroll to bottom when messages change
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [localMessages]);
 
     return (
         <div className="flex flex-col w-full h-full mx-auto p-4">
@@ -179,6 +250,23 @@ export function VercelV0Chat() {
                         </div>
                     </div>
                 ))}
+                
+                {/* Display tool calls for messages */}
+                {localMessages.map((message, index) => 
+                    message.toolCalls?.map((toolCall, toolIndex) => (
+                        <div key={`${index}-tool-${toolIndex}`} className="flex justify-start pl-10 pr-4">
+                            <div className="w-full max-w-[95%]">
+                                <ToolCallRenderer 
+                                    name={toolCall.name}
+                                    args={toolCall.args}
+                                    status={toolCall.status}
+                                    result={toolCall.result}
+                                />
+                            </div>
+                        </div>
+                    ))
+                )}
+                
                 {isLoading && (
                     <div className="flex justify-start">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white">

@@ -11,7 +11,8 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, children, label, error, id, ...props }, ref) => {
-    const selectId = id || React.useId();
+    const generatedId = React.useId();
+    const selectId = id || generatedId;
     
     return (
       <div className="relative w-full">
@@ -45,6 +46,8 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 )
 Select.displayName = "Select"
 
+// This interface extends HTMLOptionElement attributes without adding new properties
+// but maintains the naming convention for component props
 interface SelectItemProps extends React.OptionHTMLAttributes<HTMLOptionElement> {}
 
 const SelectItem = React.forwardRef<HTMLOptionElement, SelectItemProps>(

@@ -28,6 +28,7 @@ export function ChatBubble({
       className={cn(
         "flex items-start gap-2 mb-4",
         variant === "sent" && "flex-row-reverse",
+        layout === "ai" && "ai-chat-layout",
         className,
       )}
     >

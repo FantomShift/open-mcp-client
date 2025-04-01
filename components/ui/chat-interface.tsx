@@ -11,7 +11,10 @@ import {
   Clock, 
   Check, 
   CheckCheck,
-  SmilePlus
+  SmilePlus,
+  Loader2,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +28,7 @@ import { ChatInput } from "@/components/ui/chat-input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-export type MessageType = "text" | "image" | "file";
+export type MessageType = "text" | "image" | "file" | "tool-call";
 
 export interface MessageAttachment {
   id: string;
@@ -34,6 +37,15 @@ export interface MessageAttachment {
   name?: string;
   size?: string;
   previewUrl?: string;
+}
+
+export interface ToolCall {
+  id: string;
+  type: string;
+  name: string;
+  input?: Record<string, any>;
+  output?: string | Record<string, any>;
+  status: "running" | "completed" | "error";
 }
 
 export interface Message {
@@ -50,6 +62,7 @@ export interface Message {
   type: MessageType;
   attachments?: MessageAttachment[];
   isTyping?: boolean;
+  toolCalls?: ToolCall[];
 }
 
 interface ChatInterfaceProps {
@@ -236,6 +249,44 @@ export function ChatInterface({
     }
   };
 
+  const renderToolCall = (toolCall: ToolCall) => {
+    return (
+      <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md text-xs">
+        <div className="flex items-center gap-2 mb-1">
+          {toolCall.status === "running" ? (
+            <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+          ) : toolCall.status === "completed" ? (
+            <CheckCircle className="h-3 w-3 text-green-500" />
+          ) : (
+            <XCircle className="h-3 w-3 text-red-500" />
+          )}
+          <span className="font-medium">{toolCall.name}</span>
+        </div>
+        
+        {toolCall.input && (
+          <div className="mb-1">
+            <span className="text-gray-500">Input:</span>
+            <pre className="mt-1 p-1 bg-gray-100 dark:bg-gray-800 rounded overflow-x-auto">
+              {JSON.stringify(toolCall.input, null, 2)}
+            </pre>
+          </div>
+        )}
+        
+        {toolCall.output && (
+          <div>
+            <span className="text-gray-500">Output:</span>
+            <pre className="mt-1 p-1 bg-gray-100 dark:bg-gray-800 rounded overflow-x-auto">
+              {typeof toolCall.output === 'string' 
+                ? toolCall.output 
+                : JSON.stringify(toolCall.output, null, 2)
+              }
+            </pre>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={cn("h-[600px] border bg-white rounded-lg flex flex-col", className)}>
       <div className="p-3 border-b flex items-center justify-between">
@@ -271,6 +322,11 @@ export function ChatInterface({
                   {message.attachments?.map((attachment) => (
                     <div key={attachment.id}>
                       {renderAttachment(attachment)}
+                    </div>
+                  ))}
+                  {message.toolCalls?.map((toolCall) => (
+                    <div key={toolCall.id}>
+                      {renderToolCall(toolCall)}
                     </div>
                   ))}
                 </ChatBubbleMessage>

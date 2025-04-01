@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     );
     
     // Remove the service from config object - we need to check all keys
-    const config = { ...userConnections.config } || {};
+    const config = { ...(userConnections.config || {}) };
     const configKeysToDelete = Object.keys(config).filter(key => 
       normalizeServiceId(key) === normalizedServiceId
     );

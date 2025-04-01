@@ -40,27 +40,15 @@ class AgentState(CopilotKitState):
     mcp_config: Optional[MCPConfig]
 
 # Default MCP configuration to use when no configuration is provided in the state
-# Uses different transport methods based on the platform
-DEFAULT_MCP_CONFIG: MCPConfig = {}
-
-if sys.platform.startswith('win'):
-    # Use SSE transport on Windows
-    DEFAULT_MCP_CONFIG = {
-        "math": {
-            "url": "http://localhost:8765",
-            "transport": "sse",
-        },
-    }
-else:
-    # Use stdio on other platforms
-    DEFAULT_MCP_CONFIG = {
-        "math": {
-            "command": "python",
-            # Use a relative path that will be resolved based on the current working directory
-            "args": [os.path.join(os.path.dirname(__file__), "..", "math_server.py")],
-            "transport": "stdio",
-        },
-    }
+# Uses relative paths that will work within the project structure
+DEFAULT_MCP_CONFIG: MCPConfig = {
+    "math": {
+        "command": "python",
+        # Use a relative path that will be resolved based on the current working directory
+        "args": [os.path.join(os.path.dirname(__file__), "..", "math_server.py")],
+        "transport": "stdio",
+    },
+}
 
 async def chat_node(state: AgentState, config: RunnableConfig) -> Command[Literal["__end__"]]:
     """

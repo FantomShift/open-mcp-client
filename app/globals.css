@@ -293,3 +293,32 @@ code {
   right: 16px;
   bottom: 16px;
 }
+
+/* Copilot Chat Component Fixes */
+.copilotkit-chat-container,
+.copilotkit-chat-main,
+.copilotkit-chat-messages-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.copilotkit-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.copilotkit-chat-input-container {
+  flex-shrink: 0;
+}
+
+/* Ensure chat messages don't disappear and remain scrollable */
+.copilot-chat-message-list {
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}

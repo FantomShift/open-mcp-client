@@ -53,6 +53,8 @@ function useTabs() {
   return context;
 }
 
+// This interface extends HTMLDivElement attributes without adding new properties
+// but maintains the naming convention for component props
 interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function TabsList({ className, children, ...props }: TabsListProps) {

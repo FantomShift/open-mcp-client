@@ -8,6 +8,9 @@ import Link from "next/link";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { useTheme } from "@/app/components/providers";
 
+// Prevent static generation during build time
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();

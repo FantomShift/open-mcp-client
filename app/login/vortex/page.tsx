@@ -8,6 +8,9 @@ import Link from "next/link";
 import { Vortex } from "@/components/ui/vortex";
 import { useTheme } from "@/app/components/providers";
 
+// Prevent static generation during build time
+export const dynamic = 'force-dynamic';
+
 export default function VortexLoginPage() {
   const router = useRouter();
   const supabase = createClient();

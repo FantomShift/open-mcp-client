@@ -24,6 +24,9 @@ import { ThemeToggle, useTheme } from "./components/providers";
 import { ChatWrapper } from "./components/ChatWrapper";
 import { CopilotKitCSSProperties } from "@copilotkit/react-ui";
 
+// Prevent static generation during build time
+export const dynamic = 'force-dynamic';
+
 // UI Components
 import { 
   DropdownMenu, 

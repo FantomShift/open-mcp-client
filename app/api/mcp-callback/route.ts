@@ -37,7 +37,7 @@ export async function GET(request: Request) {
   
   try {
     const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createClient();
     const { searchParams } = new URL(request.url);
     
     // Log all search params for debugging

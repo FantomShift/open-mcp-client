@@ -6,6 +6,7 @@
     "dev-frontend": "pnpm i && next dev --turbopack",
     "dev-agent": "cd agent && poetry install && poetry run langgraph dev --host localhost --port 8123 --no-browser",
     "dev": "pnpx concurrently \"pnpm dev-frontend\" \"pnpm dev-agent\" --names ui,agent --prefix-colors blue,green",
+    "dev-win": "pnpx concurrently \"npm run dev-frontend\" \"npm run dev-agent\" --names ui,agent --prefix-colors blue,green",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -24,8 +25,10 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-switch": "^1.1.3",
     "@radix-ui/react-tabs": "^1.1.3",
+    "@radix-ui/react-toast": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.49.4",
     "class-validator": "^0.14.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

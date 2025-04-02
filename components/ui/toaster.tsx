@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, CheckCircle, AlertCircle, Info } from "lucide-react"
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle"
+import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 

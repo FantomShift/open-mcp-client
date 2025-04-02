@@ -97,8 +97,7 @@ const MCP_SERVICES = [
 
 export async function GET() {
   try {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
     
     // Verify authentication
     const { data: { user } } = await supabase.auth.getUser();

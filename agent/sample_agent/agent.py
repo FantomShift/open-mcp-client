@@ -3,6 +3,7 @@ This is the main entry point for the agent.
 It defines the workflow graph, state, tools, nodes and edges.
 """
 
+import platform
 from typing_extensions import Literal, TypedDict, Dict, List, Any, Union, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableConfig
@@ -13,7 +14,6 @@ from copilotkit import CopilotKitState
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 import os
-import sys
 
 # Define the connection type structures
 class StdioConnection(TypedDict):
@@ -57,6 +57,12 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[Litera
     """
     # Get MCP configuration from state, or use the default config if not provided
     mcp_config = state.get("mcp_config", DEFAULT_MCP_CONFIG)
+    
+    # On Windows, always use empty MCP config to avoid asyncio subprocess issues
+    if platform.system() == "Windows":
+        mcp_config = {}
+
+    print(f"mcp_config: {mcp_config}, default: {DEFAULT_MCP_CONFIG}")
     
     # Set up the MCP client and tools using the configuration from state
     async with MultiServerMCPClient(mcp_config) as mcp_client:

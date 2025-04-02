@@ -73,7 +73,7 @@ async function getAuthorizationUrl(serviceId: string): Promise<string | null> {
 export async function POST(request: Request) {
   try {
     const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
     
     // Verify authentication
     const { data: { user } } = await supabase.auth.getUser();

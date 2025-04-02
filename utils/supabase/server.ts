@@ -1,29 +1,23 @@
+// Mock implementation for compatibility with Next.js 15
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
+export const createClient = () => {
+  const cookieStore = cookies();
+  
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        async get(name: string) {
-          const cookie = await cookieStore.get(name)
-          return cookie?.value
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-        async set(name: string, value: string, options: CookieOptions) {
-          try {
-            await cookieStore.set(name, value, options)
-          } catch (error) {
-            // This will fail in middleware, but is required by supabase-js
-          }
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set(name, value, options);
         },
-        async remove(name: string, options: CookieOptions) {
-          try {
-            await cookieStore.set(name, "", { ...options, maxAge: 0 })
-          } catch (error) {
-            // This will fail in middleware, but is required by supabase-js
-          }
+        remove(name: string, options: CookieOptions) {
+          cookieStore.delete(name, options);
         }
       },
     },

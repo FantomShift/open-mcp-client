@@ -270,7 +270,20 @@ export function ServiceCatalog() {
         const response = await fetch('/api/mcp-services');
         
         if (!response.ok) {
-          throw new Error('Failed to fetch services');
+          const errorData = await response.json().catch(() => ({}));
+          
+          // Special handling for authentication errors
+          if (response.status === 401) {
+            console.error('Authentication required to fetch services');
+            addToast({
+              title: "Authentication Required",
+              description: "Please sign in to view available services.",
+              variant: "warning",
+            });
+            return;
+          }
+          
+          throw new Error(errorData.error || 'Failed to fetch services');
         }
         
         const data = await response.json();

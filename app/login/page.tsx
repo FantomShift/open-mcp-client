@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 import { useTheme } from "@/app/components/providers";
 
 // Prevent static generation during build time
@@ -10,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState(null);
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +18,17 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const { theme } = useTheme();
 
+  // Initialize Supabase client only on the client side
+  useEffect(() => {
+    import('@/utils/supabase/client').then(({ createClient }) => {
+      setSupabase(createClient());
+    });
+  }, []);
+
   const handleAuth = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!supabase) return; // Don't proceed if Supabase isn't initialized
+
     setLoading(true);
     setError(null);
 
@@ -61,6 +69,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!supabase) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -79,6 +88,7 @@ export default function LoginPage() {
   };
 
   const handleGithubSignIn = async () => {
+    if (!supabase) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({

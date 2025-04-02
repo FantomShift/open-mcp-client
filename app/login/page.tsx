@@ -17,9 +17,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const { theme } = useTheme();
+  const [appBaseUrl, setAppBaseUrl] = useState("");
 
-  // Initialize Supabase client only on the client side
+  // Initialize Supabase client only on the client side and detect the current domain
   useEffect(() => {
+    // Get the current domain for redirects (app.fantomshift.com in production or localhost in dev)
+    const currentUrl = window.location.origin;
+    setAppBaseUrl(currentUrl);
+    
     import('@/utils/supabase/client').then(({ createClient }) => {
       setSupabase(createClient());
     });
@@ -50,7 +55,7 @@ export default function LoginPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+            emailRedirectTo: `${appBaseUrl}/api/auth/callback`,
           },
         });
 
@@ -75,7 +80,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: `${appBaseUrl}/api/auth/callback`,
         },
       });
       
@@ -94,7 +99,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: `${appBaseUrl}/api/auth/callback`,
         },
       });
       

@@ -20,14 +20,17 @@ export async function middleware(request: NextRequest) {
                       pathname.startsWith('/api/') ||
                       pathname.includes('.') // For static files like images
 
+  // Get the base URL from the request
+  const baseUrl = new URL('/', request.url).origin
+  
   // If logged in and trying to access login page, redirect to dashboard
   if (session && pathname === '/login') {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/', baseUrl))
   }
   
   // If not logged in and trying to access a protected page, redirect to login
   if (!session && !isPublicPath) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', baseUrl))
   }
   
   // For login page, we want to bypass any layout

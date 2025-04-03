@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "sample_agent"
+name = "Adam"
 version = "0.1.0"
 description = "Starter"
 authors = ["Markus Ecker <markus.ecker@gmail.com>"]
 license = "MIT"
 
 [project]
-name = "sample_agent"
+name = "Adam"
 version = "0.0.1"
 dependencies = [
     "langchain-openai>=0.2.1",
@@ -45,4 +45,4 @@ fastmcp = "^0.4.1"
 langgraph = "^0.3.5"
 
 [tool.poetry.scripts]
-demo = "sample_agent.demo:main"
+demo = "Adam.demo:main"

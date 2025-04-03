@@ -134,7 +134,7 @@ export function VercelV0Chat() {
     const sendMessageToAgent = async (message: string) => {
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:8123/assistants/sample_agent/stream', {
+            const response = await fetch('http://localhost:8123/assistants/Adam/stream', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

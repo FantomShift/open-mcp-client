@@ -54,7 +54,7 @@ export function MCPConfigForm() {
   // Initialize agent state with the data from localStorage
   const { state: agentState, setState: setAgentState } = useCoAgent<AgentState>(
     {
-      name: "sample_agent",
+      name: "Adam",
       initialState: {
         mcp_config: savedConfigs,
       },
